@@ -57,21 +57,12 @@ public class LoginActivity extends AppCompatActivity {
     private static final int REQUEST_READ_CONTACTS = 0;
 
     /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
-    /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private UserLoginTask mAuthTask = null;
 
 
     public static final String TAG = LoginActivity.class.getName();
-
-    private CookieManager cookieManager = null;
 
     // UI references.
     private EditText mUsernameView;
@@ -81,19 +72,8 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-//        cookieManager = new CookieManager();
-        List<HttpCookie> cookies = null;
-//        try {
-//            cookies = cookieManager.getCookieStore().get(new URI(Constants.URL));
-//        } catch (URISyntaxException e) {
-//            e.printStackTrace();
-//        }
-
-//        SharedPreferences sharedPreferences = getSharedPreferences(Constants.MISCSTATE, 0);
-//         = cookieManager.getCookieStore().getCookies();
-
         MyCookieStore cookieStore = new MyCookieStore(getApplicationContext());
-        cookies = cookieStore.getCookies();
+        List<HttpCookie> cookies = cookieStore.getCookies();
         if (cookies != null) {
             for (HttpCookie cookie : cookies) {
                 Log.d(TAG, cookie.getName() + "=" + cookie.getValue());

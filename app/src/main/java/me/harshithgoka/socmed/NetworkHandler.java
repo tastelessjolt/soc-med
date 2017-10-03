@@ -34,9 +34,6 @@ public class NetworkHandler extends Handler {
         sHandler = handler;
     }
 
-//    static final String COOKIES_HEADER = "Set-Cookie";
-//    static CookieManager msCookieManager = new CookieManager();
-
     @Override
     public void handleMessage(Message msg) {
         Log.d(TAG, msg.toString());
@@ -48,29 +45,11 @@ public class NetworkHandler extends Handler {
                 URL url = new URL(Constants.URL + "Ping");
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 try {
-
-//                    Map<String, List<String>> headerFields = connection.getHeaderFields();
-//                    List<String> cookiesHeader = headerFields.get(COOKIES_HEADER);
-
-//                    if (msCookieManager.getCookieStore().getCookies().size() > 0) {
-//                        // While joining the Cookies, use ',' or ';' as needed. Most of the servers are using ';'
-//                        connection.setRequestProperty("Cookie",
-//                                TextUtils.join(";", msCookieManager.getCookieStore().getCookies()));
-//                    }
-
                     connection.getHeaderFields();
                     if (!url.getHost().equals(connection.getURL().getHost())) {
                         // we were redirected! Kick the user out to the browser to sign on?
                         throw new Exception("Login to your internet provider");
                     }
-
-//                    if (cookiesHeader != null) {
-//                        for (String cookie : cookiesHeader) {
-//                            msCookieManager.getCookieStore().add(null, HttpCookie.parse(cookie).get(0));
-//                        }
-//                    }
-
-
                     StringBuilder stringBuilder = new StringBuilder();
 
                     try (InputStream in = new BufferedInputStream(connection.getInputStream())) {
