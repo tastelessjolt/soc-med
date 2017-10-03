@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -17,8 +18,12 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
@@ -142,7 +147,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
-        return password.length() > 8;
+        return password.length() > 4;
     }
 
     /**
@@ -179,7 +184,9 @@ public class LoginActivity extends AppCompatActivity {
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    public class UserLoginTask extends AsyncTask<Void, Void, String> {
+
+        public final String TAG = UserLoginTask.class.getName();
 
         private final String mUsername;
         private final String mPassword;
@@ -210,26 +217,25 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
+        protected String doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
-
+            String ret = new String();
             try {
                 URL url = new URL(Constants.URL + "Login");
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                 try  {
-                    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
                     Gson gson = new Gson();
                     urlConnection.setReadTimeout(10000);
-                    conn.setConnectTimeout(15000);
-                    conn.setRequestMethod("POST");
-                    conn.setDoInput(true);
-                    conn.setDoOutput(true);
+                    urlConnection.setConnectTimeout(15000);
+                    urlConnection.setRequestMethod("POST");
+                    urlConnection.setDoInput(true);
+                    urlConnection.setDoOutput(true);
 
                     List<AbstractMap.SimpleEntry> parameters = new ArrayList<AbstractMap.SimpleEntry>();
                     parameters.add(new AbstractMap.SimpleEntry<String, String>("id", mUsername));
                     parameters.add(new AbstractMap.SimpleEntry<String, String>("password", mPassword));
 
-                    OutputStream os = conn.getOutputStream();
+                    OutputStream os = urlConnection.getOutputStream();
                     BufferedWriter writer = new BufferedWriter(
                             new OutputStreamWriter(os, "UTF-8"));
                     writer.write(getQuery(parameters));
@@ -237,35 +243,57 @@ public class LoginActivity extends AppCompatActivity {
                     writer.close();
                     os.close();
 
+                    urlConnection.getHeaderFields();
+
                     if (!url.getHost().equals(urlConnection.getURL().getHost())) {
                         // we were redirected! Kick the user out to the browser to sign on?
-                        throw new Exception();
+                        throw new Exception("Login to your internet provider");
+                    }
+
+                    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+
+                    StringBuilder stringBuilder = new StringBuilder();
+
+                    int nbytes;
+                    byte[] bytes = new byte[1024];
+                    while ((nbytes = in.read(bytes, 0, 1024)) != -1 ) {
+                        stringBuilder.append(new String(bytes, 0, nbytes));
+                    }
+
+                    JsonParser jsonParser = new JsonParser();
+                    JsonObject response = jsonParser.parse(stringBuilder.toString()).getAsJsonObject();
+                    Log.d(TAG, response.toString());
+                    if (response.get("status").getAsBoolean()) {
+                        ret = "true";
+                    }
+                    else {
+                        ret = response.get("message").getAsString();
                     }
                 }
                 catch (Exception e) {
-
+                    Log.d(TAG, e.toString());
                 }
                 finally {
                     urlConnection.disconnect();
                 }
-                // Simulate network access.
             } catch (Exception e) {
-                return false;
+                return e.toString();
             }
 
             // TODO: register the new account here.
-            return true;
+            return ret;
         }
 
         @Override
-        protected void onPostExecute(final Boolean success) {
+        protected void onPostExecute(final String success) {
             mAuthTask = null;
             showProgress(false);
 
-            if (success) {
-                finish();
+            if (success.equals("true")) {
+//                finish();
             } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
+//                mPasswordView.setError(getString(R.string.error_incorrect_password));
+                mPasswordView.setError(success);
                 mPasswordView.requestFocus();
             }
         }
