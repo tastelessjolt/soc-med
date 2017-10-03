@@ -1,5 +1,8 @@
 package me.harshithgoka.socmed;
 
+import android.content.Intent;
+import android.os.Handler;
+import android.os.Message;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -20,6 +23,12 @@ import android.view.ViewGroup;
 
 import android.widget.TextView;
 
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookieStore;
+import java.net.URI;
+import java.net.URISyntaxException;
+
 public class MainActivity extends AppCompatActivity {
 
     /**
@@ -37,10 +46,38 @@ public class MainActivity extends AppCompatActivity {
      */
     private ViewPager mViewPager;
 
+    private Handler mHandler;
+
+    private CookieManager cookieManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        cookieManager = new CookieManager();
+
+        mHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                if (msg.what == Constants.GET_NETWORK_STATE) {
+                    Constants.NETWORK_STATE state = (Constants.NETWORK_STATE) msg.obj;
+                    if (state == Constants.NETWORK_STATE.NOT_LOGGED_IN) {
+                        new MyCookieStore(getApplicationContext()).removeAll();
+                        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                }
+            }
+        };
+
+        Constants.currHandler = mHandler;
+
+        Intent intent = new Intent(getApplicationContext(), NetworkService.class);
+        intent.putExtra(Constants.WHAT, Constants.GET_NETWORK_STATE);
+        startService(intent);
+
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());

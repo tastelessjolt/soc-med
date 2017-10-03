@@ -2,6 +2,7 @@ package me.harshithgoka.socmed;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 import android.widget.EditText;
 
 import java.net.CookieStore;
@@ -20,6 +21,8 @@ import java.util.Map;
  */
 
 public class MyCookieStore implements CookieStore {
+
+    public static final String TAG = MyCookieStore.class.getName();
 
     /*
     * In memory storage of cookies
@@ -58,7 +61,7 @@ public class MyCookieStore implements CookieStore {
                     }
                 }
 
-                System.out.println(entry.getKey() + ": " + strCookie);
+                Log.d(TAG,entry.getKey() + ": " + strCookie);
             }
         }
 
@@ -88,6 +91,8 @@ public class MyCookieStore implements CookieStore {
 
     @Override
     public List<HttpCookie> get(URI uri) {
+
+        Log.d (TAG, uri.toString());
         uri = getAuthorityUri(uri);
         List<HttpCookie> cookies = mapCookies.get(uri);
 
@@ -125,6 +130,9 @@ public class MyCookieStore implements CookieStore {
     @Override
     public boolean removeAll() {
         mapCookies.clear();
+        SharedPreferences.Editor editor = spePreferences.edit();
+        editor.clear();
+        editor.commit();
         return true;
     }
 }

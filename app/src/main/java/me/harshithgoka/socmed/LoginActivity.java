@@ -35,6 +35,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -66,6 +68,11 @@ public class LoginActivity extends AppCompatActivity {
      */
     private UserLoginTask mAuthTask = null;
 
+
+    public static final String TAG = LoginActivity.class.getName();
+
+    private CookieManager cookieManager = null;
+
     // UI references.
     private EditText mUsernameView;
     private EditText mPasswordView;
@@ -74,8 +81,29 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        SharedPreferences sharedPreferences = getSharedPreferences(Constants.MISCSTATE, 0);
-        if( sharedPreferences.getBoolean(Constants.LOGINSTATE, false)) {
+//        cookieManager = new CookieManager();
+        List<HttpCookie> cookies = null;
+//        try {
+//            cookies = cookieManager.getCookieStore().get(new URI(Constants.URL));
+//        } catch (URISyntaxException e) {
+//            e.printStackTrace();
+//        }
+
+//        SharedPreferences sharedPreferences = getSharedPreferences(Constants.MISCSTATE, 0);
+//         = cookieManager.getCookieStore().getCookies();
+
+        MyCookieStore cookieStore = new MyCookieStore(getApplicationContext());
+        cookies = cookieStore.getCookies();
+        if (cookies != null) {
+            for (HttpCookie cookie : cookies) {
+                Log.d(TAG, cookie.getName() + "=" + cookie.getValue());
+            }
+        }
+        else {
+            Log.d(TAG, "No cookies in CookieStore");
+        }
+
+        if( cookies.size() > 0 ) {
             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             startActivity(intent);
             finish();
