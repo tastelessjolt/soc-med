@@ -3,6 +3,8 @@ package me.harshithgoka.socmed;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 
 import android.os.AsyncTask;
@@ -27,11 +29,15 @@ import com.google.gson.JsonParser;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.CookieHandler;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.AbstractMap;
@@ -68,7 +74,15 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SharedPreferences sharedPreferences = getSharedPreferences(Constants.MISCSTATE, 0);
+        if( sharedPreferences.getBoolean(Constants.LOGINSTATE, false)) {
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(intent);
+            finish();
+        }
+
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_login);
 
         // Set up the login form.
@@ -196,26 +210,6 @@ public class LoginActivity extends AppCompatActivity {
             mPassword = password;
         }
 
-        private String getQuery(List<AbstractMap.SimpleEntry> params) throws UnsupportedEncodingException
-        {
-            StringBuilder result = new StringBuilder();
-            boolean first = true;
-
-            for (AbstractMap.SimpleEntry pair : params)
-            {
-                if (first)
-                    first = false;
-                else
-                    result.append("&");
-
-                result.append(URLEncoder.encode((String) pair.getKey(), "UTF-8"));
-                result.append("=");
-                result.append(URLEncoder.encode((String) pair.getValue(), "UTF-8"));
-            }
-
-            return result.toString();
-        }
-
         @Override
         protected String doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
@@ -238,7 +232,7 @@ public class LoginActivity extends AppCompatActivity {
                     OutputStream os = urlConnection.getOutputStream();
                     BufferedWriter writer = new BufferedWriter(
                             new OutputStreamWriter(os, "UTF-8"));
-                    writer.write(getQuery(parameters));
+                    writer.write(Utils.getQuery(parameters));
                     writer.flush();
                     writer.close();
                     os.close();
@@ -290,7 +284,14 @@ public class LoginActivity extends AppCompatActivity {
             showProgress(false);
 
             if (success.equals("true")) {
-//                finish();
+                SharedPreferences sharedPreferences = getSharedPreferences(Constants.MISCSTATE, 0);
+
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean(Constants.LOGINSTATE, true);
+                editor.commit();
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                startActivity(intent);
+                finish();
             } else {
 //                mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.setError(success);
