@@ -1,7 +1,12 @@
 package me.harshithgoka.socmed;
 
+import android.app.Service;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -11,6 +16,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -31,11 +42,32 @@ public class MainFragment extends Fragment {
 
     public static final String TAG = MainFragment.class.getName();
     private static final String ARG_SECTION_NUMBER = "section_number";
+
+    public JsonArray getFeed() {
+        return feed;
+    }
+
+    public void setFeed(JsonArray feed) {
+        MainFragment.feed = feed;
+        Log.d(TAG, "why? OH why? " + feed.toString());
+        if (adapter != null) {
+            Log.d(TAG, "Yeah!!");
+            adapter.changeDataset(feed);
+        }
+        if (swipeRefreshLayout != null) {
+            swipeRefreshLayout.setRefreshing(false);
+        }
+    }
+
+    private static JsonArray feed;
+
     RecyclerView recyclerView;
-    RecyclerView.Adapter adapter;
+    MyAdapter adapter;
     LinearLayoutManager linearLayoutManager;
+    SwipeRefreshLayout swipeRefreshLayout;
 
     public MainFragment() {
+
     }
 
     /**
@@ -50,12 +82,13 @@ public class MainFragment extends Fragment {
         return fragment;
     }
 
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         recyclerView = (RecyclerView) rootView.findViewById(R.id.recycler);
-        adapter = new MyAdapter();
+        adapter = new MyAdapter(MainFragment.feed);
 
         recyclerView.setAdapter(adapter);
         linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
@@ -64,6 +97,18 @@ public class MainFragment extends Fragment {
         recyclerView.setHasFixedSize(true);
 
 
+        swipeRefreshLayout = rootView.findViewById(R.id.swiperefresh);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                Log.d(TAG, "Refresh received");
+
+                Intent intent = new Intent(getContext(), NetworkService.class);
+                intent.putExtra(Constants.WHAT, Constants.GET_FEED);
+                getContext().startService(intent);
+            }
+        });
+
         Log.d(TAG, getArguments().getInt(ARG_SECTION_NUMBER, -1) + "");
 //            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
         return rootView;
@@ -71,7 +116,13 @@ public class MainFragment extends Fragment {
 
     public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
-        public String[] dummy_dataset; 
+        public String[] dummy_dataset;
+
+        public void setData(JsonArray data) {
+            this.data = data;
+        }
+
+        public JsonArray data = null;
         // Provide a reference to the views for each data item
         // Complex data items may need more than one view per item, and
         // you provide access to all the views for a data item in a view holder
@@ -84,11 +135,19 @@ public class MainFragment extends Fragment {
             }
         }
 
-        MyAdapter() {
+        public void changeDataset(JsonArray dataset) {
+            data = dataset;
+            notifyDataSetChanged();
+        }
+
+        MyAdapter(JsonArray argdata) {
+            data = argdata;
             dummy_dataset = new String[]{"Zhang", "Hey! What's up? Ya dawg.",
                     "Dude", "I'm good dawg.",
                     "Zhang", "Noice! This is just me wanting to write a big passage to fill up the space, I know I could use lorem ipsum but I don't understand Latin or whatever language that is in. So bear with me. :P"};
-
+            Intent intent = new Intent(getContext(), NetworkService.class);
+            intent.putExtra(Constants.WHAT, Constants.GET_FEED);
+            getContext().startService(intent);
         }
 
         @Override
@@ -104,13 +163,24 @@ public class MainFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            ( (TextView) holder.mLin.findViewById(R.id.post_name)).setText( dummy_dataset[position * 2]);
-            ( (TextView) holder.mLin.findViewById(R.id.post_text)).setText( dummy_dataset[position * 2 + 1]);
+            if (data == null) {
+                ((TextView) holder.mLin.findViewById(R.id.post_name)).setText(dummy_dataset[position * 2]);
+                ((TextView) holder.mLin.findViewById(R.id.post_text)).setText(dummy_dataset[position * 2 + 1]);
+            }
+            else {
+                JsonObject object = (JsonObject) data.get(position);
+                ((TextView) holder.mLin.findViewById(R.id.post_name)).setText(object.get("name").getAsString());
+                ((TextView) holder.mLin.findViewById(R.id.post_text)).setText(object.get("text").getAsString());
+            }
         }
-
         @Override
         public int getItemCount() {
-            return 3;
+            if (data != null)
+                return data.size();
+            else
+                return dummy_dataset.length/2;
         }
+
+
     }
 }

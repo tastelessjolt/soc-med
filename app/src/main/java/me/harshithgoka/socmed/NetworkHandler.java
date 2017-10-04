@@ -12,11 +12,14 @@ import com.google.gson.JsonParser;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.CookieManager;
 import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +44,7 @@ public class NetworkHandler extends Handler {
 
         }
         else if (msg.what == Constants.GET_NETWORK_STATE) {
+            Constants.NETWORK_STATE state;
             try {
                 URL url = new URL(Constants.URL + "Ping");
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -65,14 +69,14 @@ public class NetworkHandler extends Handler {
                     Log.d(TAG, response.toString());
 
                     if (response.get("status").getAsBoolean()) {
-                        sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.LOGGED_IN));
+                        state = Constants.NETWORK_STATE.LOGGED_IN;
                     } else {
-                        sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_LOGGED_IN));
+                        state = Constants.NETWORK_STATE.NOT_LOGGED_IN;
                     }
 
                 } catch (Exception e) {
                     Log.d(TAG, e.toString());
-                    sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
+                    state = Constants.NETWORK_STATE.NOT_CONNECTED;
                 }
                 finally {
                     connection.disconnect();
@@ -80,7 +84,43 @@ public class NetworkHandler extends Handler {
             }
             catch (Exception e) {
                 Log.d(TAG, e.toString());
+                state = Constants.NETWORK_STATE.NOT_CONNECTED;
                 sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
+            }
+            sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, state));
+        }
+        else if (msg.what == Constants.GET_FEED) {
+            try {
+                URL url = new URL(Constants.URL + "SeePosts");
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                try {
+                    connection.getHeaderFields();
+                    if (!url.getHost().equals(connection.getURL().getHost())) {
+                        // we were redirected! Kick the user out to the browser to sign on?
+                        throw new Exception("Login to your internet provider");
+                    }
+
+                    JsonObject response = Utils.getAndParse(connection.getInputStream());
+                    Log.d(TAG, response.toString());
+
+                    if (response.get("status").getAsBoolean()) {
+                        sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_FEED, response));
+                    } else {
+                        sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_LOGGED_IN));
+                    }
+
+
+                }
+                catch (Exception e) {
+                    Log.d(TAG, e.toString());
+                } finally {
+                    connection.disconnect();
+                }
+
+            } catch (MalformedURLException e) {
+                Log.d(TAG, e.toString());
+            } catch (IOException e) {
+                Log.d(TAG, e.toString());
             }
         }
     }

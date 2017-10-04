@@ -14,6 +14,10 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
+import java.io.InputStream;
 import java.net.CookieManager;
 
 public class MainActivity extends AppCompatActivity {
@@ -56,6 +60,12 @@ public class MainActivity extends AppCompatActivity {
                         finish();
                     }
                 }
+                else if (msg.what == Constants.GET_FEED) {
+                    JsonObject jsonObject = (JsonObject) msg.obj;
+                    if (jsonObject != null) {
+                        ( (MainFragment) mSectionsPagerAdapter.getItem(0)).setFeed(jsonObject.get("data").getAsJsonArray());
+                    }
+                }
             }
         };
 
@@ -90,21 +100,31 @@ public class MainActivity extends AppCompatActivity {
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
+        int count = 3;
+
+        MainFragment[] mainFragment = new MainFragment[count];
+
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
+
+            for (int i = 0; i != count; i++) {
+                mainFragment[i] = MainFragment.newInstance(i + 1);
+            }
         }
+
+
 
         @Override
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a MainFragment (defined as a static inner class below).
-            return MainFragment.newInstance(position + 1);
+            return mainFragment[position];
         }
 
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 3;
+            return count;
         }
     }
 }

@@ -20,6 +20,7 @@ public final class Constants {
 
     public static int ACK = 0;
     public static int GET_NETWORK_STATE = 1;
+    public static int GET_FEED=2;
     public enum NETWORK_STATE {
         NETWORK_STATE, LOGGED_IN, NOT_LOGGED_IN, NOT_CONNECTED
 
