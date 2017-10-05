@@ -102,14 +102,14 @@ public class MainActivity extends AppCompatActivity {
 
         int count = 3;
 
-        MainFragment[] mainFragment = new MainFragment[count];
+        MainFragment mainFragment, mainFragment1;
+        ProfileFragment profileFragment;
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
-
-            for (int i = 0; i != count; i++) {
-                mainFragment[i] = MainFragment.newInstance(i + 1);
-            }
+            mainFragment = MainFragment.newInstance(1);
+            mainFragment1 = MainFragment.newInstance(2);
+            profileFragment = ProfileFragment.newInstance(3);
         }
 
 
@@ -118,7 +118,16 @@ public class MainActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a MainFragment (defined as a static inner class below).
-            return mainFragment[position];
+            switch (position) {
+                case 0:
+                    return mainFragment;
+                case 1:
+                    return mainFragment1;
+                case 2:
+                    return profileFragment;
+                default:
+                    return mainFragment;
+            }
         }
 
         @Override
