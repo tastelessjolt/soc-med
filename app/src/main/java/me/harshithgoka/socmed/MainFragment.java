@@ -26,7 +26,7 @@ import com.google.gson.JsonArray;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainFragment extends Fragment {
+public class MainFragment extends CommonFragment {
     /**
      * The fragment argument representing the section number for this
      * fragment.
@@ -54,7 +54,6 @@ public class MainFragment extends Fragment {
     RecyclerView recyclerView;
     PostAdapter adapter;
     LinearLayoutManager linearLayoutManager;
-    SwipeRefreshLayout swipeRefreshLayout;
 
     public MainFragment() {
 

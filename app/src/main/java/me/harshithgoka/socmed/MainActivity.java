@@ -3,6 +3,8 @@ package me.harshithgoka.socmed;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 
@@ -13,6 +15,7 @@ import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -56,8 +59,20 @@ public class MainActivity extends AppCompatActivity {
                     if (state == Constants.NETWORK_STATE.NOT_LOGGED_IN) {
                         new MyCookieStore(getApplicationContext()).removeAll();
                         Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                        intent.putExtra(Constants.INTENT_DATA, Constants.GET_NETWORK_STATE);
                         startActivity(intent);
                         finish();
+                    }
+                    else if (state == Constants.NETWORK_STATE.NOT_CONNECTED) {
+                        ( (CommonFragment) mSectionsPagerAdapter.getItem(mViewPager.getCurrentItem())).stopRefresh();
+                        Snackbar snackbar = Snackbar.make(mViewPager.getRootView(), "You are not connected to the Internet", Snackbar.LENGTH_LONG);
+                        snackbar.setAction("WiFi Settings", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+                            }
+                        });
+                        snackbar.show();
                     }
                 }
                 else if (msg.what == Constants.GET_FEED) {

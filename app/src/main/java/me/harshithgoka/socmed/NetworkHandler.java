@@ -85,7 +85,6 @@ public class NetworkHandler extends Handler {
             catch (Exception e) {
                 Log.d(TAG, e.toString());
                 state = Constants.NETWORK_STATE.NOT_CONNECTED;
-                sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
             }
             sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, state));
         }
@@ -113,14 +112,17 @@ public class NetworkHandler extends Handler {
                 }
                 catch (Exception e) {
                     Log.d(TAG, e.toString());
+                    sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
                 } finally {
                     connection.disconnect();
                 }
 
             } catch (MalformedURLException e) {
                 Log.d(TAG, e.toString());
+                sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
             } catch (IOException e) {
                 Log.d(TAG, e.toString());
+                sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
             }
         }
         else if (msg.what == Constants.GET_MY_POSTS) {
@@ -145,15 +147,19 @@ public class NetworkHandler extends Handler {
 
                 } catch (IOException e) {
                     Log.d(TAG, e.toString());
+                    sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
                 } catch (Exception e) {
                     Log.d(TAG, e.toString());
+                    sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
                 } finally {
                     connection.disconnect();
                 }
             } catch (MalformedURLException e) {
                 Log.d(TAG, e.toString());
+                sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
             } catch (IOException e) {
                 Log.d(TAG, e.toString());
+                sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
             }
         }
     }

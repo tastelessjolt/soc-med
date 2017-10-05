@@ -139,7 +139,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                 Log.d(TAG, "Comment here " + object.toString());
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
                 int len = Math.min(comments.size(), 3);
-                for (int i = 0; i != 0; i++) {
+                for (int i = 0; i != len; i++) {
                     LinearLayout linearLayout1 = (LinearLayout) ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.comment, linearLayout, false);
 
                     ((TextView) linearLayout1.findViewById(R.id.comment_name)).setText(comments.get(i).getAsJsonObject().get("name").getAsString());
@@ -147,7 +147,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                     ((TextView) linearLayout1.findViewById(R.id.comment_timestamp)).setText(convertTimestamp(comments.get(i).getAsJsonObject().get("timestamp").getAsString()));
                     linearLayout.addView(linearLayout1, params);
                 }
-                if (true) {
+                if (len < comments.size()) {
                     Button button = new Button(context);
                     button.setId(9399);
                     button.setText("More");
@@ -170,7 +170,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         @Override
         public void onClick(View view) {
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            for (int i = 0; i < comments.size(); i++) {
+            for (int i = 3; i < comments.size(); i++) {
                 LinearLayout linearLayout1 = (LinearLayout) ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.comment, linearLayout, false);
 
                 ((TextView) linearLayout1.findViewById(R.id.comment_name)).setText(comments.get(i).getAsJsonObject().get("name").getAsString());

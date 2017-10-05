@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 
 import android.os.AsyncTask;
@@ -91,7 +92,19 @@ public class LoginActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
 
+
+
+
         setContentView(R.layout.activity_login);
+        Intent intent = getIntent();
+        if (intent != null) {
+            if ( intent.getIntExtra(Constants.INTENT_DATA, -1) == Constants.GET_NETWORK_STATE) {
+                if (mUsernameView != null) {
+                    Snackbar.make(mUsernameView.getRootView(), "You have been logged out! Please login again", Snackbar.LENGTH_INDEFINITE).show();
+                }
+            }
+        }
+
 
         // Set up the login form.
         mUsernameView = (EditText) findViewById(R.id.username);

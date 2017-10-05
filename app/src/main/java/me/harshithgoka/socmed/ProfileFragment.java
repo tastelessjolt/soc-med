@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -25,7 +27,7 @@ import com.google.gson.JsonArray;
  * Use the {@link ProfileFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ProfileFragment extends Fragment {
+public class ProfileFragment extends CommonFragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     public static final String TAG = ProfileFragment.class.getName();
@@ -37,7 +39,6 @@ public class ProfileFragment extends Fragment {
     private RecyclerView recyclerView;
     private PostAdapter adapter;
     private LinearLayoutManager linearLayoutManager;
-    private SwipeRefreshLayout swipeRefreshLayout;
 
     private OnFragmentInteractionListener mListener;
 
@@ -71,10 +72,22 @@ public class ProfileFragment extends Fragment {
         }
     }
 
+    public void stopRefresh() {
+        swipeRefreshLayout.setRefreshing(false);
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_profile, container, false);
+        FloatingActionButton floatingActionButton = (FloatingActionButton) rootView.findViewById(R.id.fab);
+        floatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view.getRootView(), "Person Info", Snackbar.LENGTH_INDEFINITE).show();
+            }
+        });
+
         recyclerView = (RecyclerView) rootView.findViewById(R.id.profile_recycler);
         adapter = new PostAdapter(getContext(), ProfileFragment.myPosts, Constants.POSTS_TYPE.MY_POSTS);
 
