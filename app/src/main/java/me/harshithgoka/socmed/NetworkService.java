@@ -9,6 +9,8 @@ import android.util.Log;
 
 import com.google.gson.JsonObject;
 
+import org.json.JSONArray;
+
 import java.lang.ref.WeakReference;
 
 public class NetworkService extends Service {
@@ -31,6 +33,9 @@ public class NetworkService extends Service {
             }
             else if (what == Constants.GET_FEED) {
                 tHandler.sendMessage(tHandler.obtainMessage(Constants.GET_FEED));
+            }
+            else if (what == Constants.GET_MY_POSTS) {
+                tHandler.sendMessage(tHandler.obtainMessage(Constants.GET_MY_POSTS));
             }
         }
 
@@ -66,6 +71,14 @@ public class NetworkService extends Service {
             if (jsonObject != null) {
                 if (Constants.currHandler != null) {
                     Constants.currHandler.sendMessage(Constants.currHandler.obtainMessage(Constants.GET_FEED, jsonObject));
+                }
+            }
+        }
+        else if (msg.what == Constants.GET_MY_POSTS) {
+            JsonObject jsonObject = (JsonObject) msg.obj;
+            if (jsonObject != null) {
+                if (Constants.currHandler != null) {
+                    Constants.currHandler.sendMessage(Constants.currHandler.obtainMessage(Constants.GET_MY_POSTS, jsonObject));
                 }
             }
         }

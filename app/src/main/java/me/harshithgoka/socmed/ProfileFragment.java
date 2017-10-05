@@ -1,13 +1,21 @@
 package me.harshithgoka.socmed;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.google.gson.JsonArray;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -20,12 +28,20 @@ import android.widget.TextView;
 public class ProfileFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    public static final String TAG = ProfileFragment.class.getName();
     private static final String ARG_ITEM_NUMBER = "item_number";
 
     // TODO: Rename and change types of parameters
     private int itemNumber;
 
+    private RecyclerView recyclerView;
+    private PostAdapter adapter;
+    private LinearLayoutManager linearLayoutManager;
+    private SwipeRefreshLayout swipeRefreshLayout;
+
     private OnFragmentInteractionListener mListener;
+
+    public static JsonArray myPosts;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -59,6 +75,25 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_profile, container, false);
+        recyclerView = (RecyclerView) rootView.findViewById(R.id.profile_recycler);
+        adapter = new PostAdapter(getContext(), ProfileFragment.myPosts, Constants.POSTS_TYPE.MY_POSTS);
+
+        recyclerView.setAdapter(adapter);
+        linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setHasFixedSize(true);
+
+
+        swipeRefreshLayout = rootView.findViewById(R.id.profileswiperefresh);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                Log.d(TAG, "Refresh received");
+                adapter.refreshDataset();
+            }
+        });
+
         return rootView;
     }
 
@@ -84,6 +119,16 @@ public class ProfileFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    public void setData(JsonArray jsonArray) {
+        myPosts = jsonArray;
+        if (adapter != null) {
+            adapter.changeDataset(jsonArray);
+        }
+        if (swipeRefreshLayout != null) {
+            swipeRefreshLayout.setRefreshing(false);
+        }
     }
 
     /**

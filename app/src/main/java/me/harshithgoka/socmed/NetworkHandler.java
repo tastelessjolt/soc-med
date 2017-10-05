@@ -123,6 +123,39 @@ public class NetworkHandler extends Handler {
                 Log.d(TAG, e.toString());
             }
         }
+        else if (msg.what == Constants.GET_MY_POSTS) {
+            try {
+                URL url = new URL(Constants.URL + "SeeMyPosts");
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                try {
+                    connection.getHeaderFields();
+                    if (!url.getHost().equals(connection.getURL().getHost())) {
+                        // we were redirected! Kick the user out to the browser to sign on?
+                        throw new Exception("Login to your internet provider");
+                    }
+
+                    JsonObject response = Utils.getAndParse(connection.getInputStream());
+                    Log.d(TAG, response.toString());
+
+                    if (response.get("status").getAsBoolean()) {
+                        sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_MY_POSTS, response));
+                    } else {
+                        sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_LOGGED_IN));
+                    }
+
+                } catch (IOException e) {
+                    Log.d(TAG, e.toString());
+                } catch (Exception e) {
+                    Log.d(TAG, e.toString());
+                } finally {
+                    connection.disconnect();
+                }
+            } catch (MalformedURLException e) {
+                Log.d(TAG, e.toString());
+            } catch (IOException e) {
+                Log.d(TAG, e.toString());
+            }
+        }
     }
 }
 

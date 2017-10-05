@@ -63,7 +63,13 @@ public class MainActivity extends AppCompatActivity {
                 else if (msg.what == Constants.GET_FEED) {
                     JsonObject jsonObject = (JsonObject) msg.obj;
                     if (jsonObject != null) {
-                        ( (MainFragment) mSectionsPagerAdapter.getItem(0)).setFeed(jsonObject.get("data").getAsJsonArray());
+                        ( (MainFragment) mSectionsPagerAdapter.getItem(0)).setData(jsonObject.get("data").getAsJsonArray());
+                    }
+                }
+                else if (msg.what == Constants.GET_MY_POSTS) {
+                    JsonObject jsonObject = (JsonObject) msg.obj;
+                    if (jsonObject != null) {
+                        ( (ProfileFragment) mSectionsPagerAdapter.getItem(2)).setData(jsonObject.get("data").getAsJsonArray());
                     }
                 }
             }

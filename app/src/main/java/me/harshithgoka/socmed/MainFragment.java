@@ -1,10 +1,7 @@
 package me.harshithgoka.socmed;
 
-import android.app.Service;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -14,14 +11,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -47,11 +39,9 @@ public class MainFragment extends Fragment {
         return feed;
     }
 
-    public void setFeed(JsonArray feed) {
+    public void setData(JsonArray feed) {
         MainFragment.feed = feed;
-        Log.d(TAG, "why? OH why? " + feed.toString());
         if (adapter != null) {
-            Log.d(TAG, "Yeah!!");
             adapter.changeDataset(feed);
         }
         if (swipeRefreshLayout != null) {
@@ -62,7 +52,7 @@ public class MainFragment extends Fragment {
     private static JsonArray feed;
 
     RecyclerView recyclerView;
-    MyAdapter adapter;
+    PostAdapter adapter;
     LinearLayoutManager linearLayoutManager;
     SwipeRefreshLayout swipeRefreshLayout;
 
@@ -88,7 +78,7 @@ public class MainFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         recyclerView = (RecyclerView) rootView.findViewById(R.id.recycler);
-        adapter = new MyAdapter(MainFragment.feed);
+        adapter = new PostAdapter(getContext(), MainFragment.feed, Constants.POSTS_TYPE.FEED);
 
         recyclerView.setAdapter(adapter);
         linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
@@ -103,84 +93,12 @@ public class MainFragment extends Fragment {
             public void onRefresh() {
                 Log.d(TAG, "Refresh received");
 
-                Intent intent = new Intent(getContext(), NetworkService.class);
-                intent.putExtra(Constants.WHAT, Constants.GET_FEED);
-                getContext().startService(intent);
+                adapter.refreshDataset();
             }
         });
 
         Log.d(TAG, getArguments().getInt(ARG_SECTION_NUMBER, -1) + "");
 //            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
         return rootView;
-    }
-
-    public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
-
-        public String[] dummy_dataset;
-
-        public void setData(JsonArray data) {
-            this.data = data;
-        }
-
-        public JsonArray data = null;
-        // Provide a reference to the views for each data item
-        // Complex data items may need more than one view per item, and
-        // you provide access to all the views for a data item in a view holder
-        public class ViewHolder extends RecyclerView.ViewHolder {
-            // each data item is just a string in this case
-            public LinearLayout mLin;
-            public ViewHolder(LinearLayout v) {
-                super(v);
-                mLin = v;
-            }
-        }
-
-        public void changeDataset(JsonArray dataset) {
-            data = dataset;
-            notifyDataSetChanged();
-        }
-
-        MyAdapter(JsonArray argdata) {
-            data = argdata;
-            dummy_dataset = new String[]{"Zhang", "Hey! What's up? Ya dawg.",
-                    "Dude", "I'm good dawg.",
-                    "Zhang", "Noice! This is just me wanting to write a big passage to fill up the space, I know I could use lorem ipsum but I don't understand Latin or whatever language that is in. So bear with me. :P"};
-            Intent intent = new Intent(getContext(), NetworkService.class);
-            intent.putExtra(Constants.WHAT, Constants.GET_FEED);
-            getContext().startService(intent);
-        }
-
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            // create a new view
-            LinearLayout v = (LinearLayout) LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.post, parent, false);
-            // set the view's size, margins, paddings and layout parameters
-
-            ViewHolder vh = new ViewHolder(v);
-            return vh;
-        }
-
-        @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
-            if (data == null) {
-                ((TextView) holder.mLin.findViewById(R.id.post_name)).setText(dummy_dataset[position * 2]);
-                ((TextView) holder.mLin.findViewById(R.id.post_text)).setText(dummy_dataset[position * 2 + 1]);
-            }
-            else {
-                JsonObject object = (JsonObject) data.get(position);
-                ((TextView) holder.mLin.findViewById(R.id.post_name)).setText(object.get("name").getAsString());
-                ((TextView) holder.mLin.findViewById(R.id.post_text)).setText(object.get("text").getAsString());
-            }
-        }
-        @Override
-        public int getItemCount() {
-            if (data != null)
-                return data.size();
-            else
-                return dummy_dataset.length/2;
-        }
-
-
     }
 }
