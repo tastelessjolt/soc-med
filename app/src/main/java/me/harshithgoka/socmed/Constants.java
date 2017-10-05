@@ -1,7 +1,10 @@
 package me.harshithgoka.socmed;
 
 import android.app.Service;
+import android.graphics.Typeface;
 import android.os.Handler;
+
+import java.lang.reflect.Type;
 
 
 /**
@@ -16,14 +19,12 @@ public final class Constants {
 
     public static String INTENT_DATA = "IntentData";
     public static String WHAT = "what";
-
-
     public static int ACK = 0;
     public static int GET_NETWORK_STATE = 1;
     public static int GET_FEED = 2;
     public static int GET_MY_POSTS = 3;
     public enum NETWORK_STATE {
-        NETWORK_STATE, LOGGED_IN, NOT_LOGGED_IN, NOT_CONNECTED
+        LOGGED_IN, NOT_LOGGED_IN, NOT_CONNECTED
 
     }
 

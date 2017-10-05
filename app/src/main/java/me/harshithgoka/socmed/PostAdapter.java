@@ -20,6 +20,7 @@ import org.w3c.dom.Text;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.zip.Inflater;
 
@@ -53,14 +54,60 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         }
     }
 
+    public String printDifference(Date startDate, Date endDate) {
+        //milliseconds
+        long different = endDate.getTime() - startDate.getTime();
+
+        System.out.println("startDate : " + startDate);
+        System.out.println("endDate : "+ endDate);
+        System.out.println("different : " + different);
+
+        long secondsInMilli = 1000;
+        long minutesInMilli = secondsInMilli * 60;
+        long hoursInMilli = minutesInMilli * 60;
+        long daysInMilli = hoursInMilli * 24;
+        long weeksInMilli = daysInMilli * 7;
+
+        long elapsedWeeks = different / weeksInMilli;
+
+        long elapsedDays = different / daysInMilli;
+        different = different % daysInMilli;
+
+        long elapsedHours = different / hoursInMilli;
+        different = different % hoursInMilli;
+
+        long elapsedMinutes = different / minutesInMilli;
+        different = different % minutesInMilli;
+
+        long elapsedSeconds = different / secondsInMilli;
+
+        if (elapsedWeeks > 0) {
+            return elapsedWeeks + "w";
+        }
+        else if (elapsedDays > 0) {
+            return elapsedDays + "d";
+        }
+        else if (elapsedHours > 0) {
+            return elapsedHours + "h";
+        }
+        else if (elapsedMinutes > 0) {
+            return elapsedMinutes + "m";
+        }
+        else if (elapsedSeconds > 0) {
+            return elapsedSeconds + "s";
+        }
+        else {
+            return "";
+        }
+    }
+
     public String convertTimestamp (String strtimestamp) {
         String strTimestamp = strtimestamp.split("\\.")[0];
         Log.d(TAG, strTimestamp);
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         try {
             Date date = format.parse(strTimestamp);
-            SimpleDateFormat myFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-            return myFormat.format(date);
+            return printDifference(date, Calendar.getInstance().getTime()) + " ago";
         } catch (ParseException e) {
             // TODO Auto-generated catch block
             Log.d(TAG, e.toString());
