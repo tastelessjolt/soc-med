@@ -1,5 +1,6 @@
 package me.harshithgoka.socmed;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -63,11 +64,16 @@ public class MainFragment extends CommonFragment {
      * Returns a new instance of this fragment for the given section
      * number.
      */
-    public static MainFragment newInstance(int sectionNumber) {
+    public static MainFragment newInstance(int sectionNumber, Context context) {
         MainFragment fragment = new MainFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_SECTION_NUMBER, sectionNumber);
         fragment.setArguments(args);
+
+        Intent intent = new Intent(context, NetworkService.class);
+        intent.putExtra(Constants.WHAT, Constants.GET_FEED);
+        context.startService(intent);
+
         return fragment;
     }
 
@@ -85,7 +91,6 @@ public class MainFragment extends CommonFragment {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setHasFixedSize(true);
 
-
         swipeRefreshLayout = rootView.findViewById(R.id.swiperefresh);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -96,6 +101,7 @@ public class MainFragment extends CommonFragment {
             }
         });
 
+//        adapter.refreshDataset();
         Log.d(TAG, getArguments().getInt(ARG_SECTION_NUMBER, -1) + "");
 //            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
         return rootView;

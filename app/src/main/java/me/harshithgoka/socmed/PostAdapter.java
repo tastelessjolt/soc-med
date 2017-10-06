@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.IdRes;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -47,73 +48,13 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     // you provide access to all the views for a data item in a view holder
     public class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
+        public RecyclerView recyclerView;
+        public CommentAdapter commentAdapter;
         public LinearLayout mLin;
         public ViewHolder(LinearLayout v) {
             super(v);
             mLin = v;
         }
-    }
-
-    public String printDifference(Date startDate, Date endDate) {
-        //milliseconds
-        long different = endDate.getTime() - startDate.getTime();
-
-        System.out.println("startDate : " + startDate);
-        System.out.println("endDate : "+ endDate);
-        System.out.println("different : " + different);
-
-        long secondsInMilli = 1000;
-        long minutesInMilli = secondsInMilli * 60;
-        long hoursInMilli = minutesInMilli * 60;
-        long daysInMilli = hoursInMilli * 24;
-        long weeksInMilli = daysInMilli * 7;
-
-        long elapsedWeeks = different / weeksInMilli;
-
-        long elapsedDays = different / daysInMilli;
-        different = different % daysInMilli;
-
-        long elapsedHours = different / hoursInMilli;
-        different = different % hoursInMilli;
-
-        long elapsedMinutes = different / minutesInMilli;
-        different = different % minutesInMilli;
-
-        long elapsedSeconds = different / secondsInMilli;
-
-        if (elapsedWeeks > 0) {
-            return elapsedWeeks + "w";
-        }
-        else if (elapsedDays > 0) {
-            return elapsedDays + "d";
-        }
-        else if (elapsedHours > 0) {
-            return elapsedHours + "h";
-        }
-        else if (elapsedMinutes > 0) {
-            return elapsedMinutes + "m";
-        }
-        else if (elapsedSeconds > 0) {
-            return elapsedSeconds + "s";
-        }
-        else {
-            return "";
-        }
-    }
-
-    public String convertTimestamp (String strtimestamp) {
-        String strTimestamp = strtimestamp.split("\\.")[0];
-        Log.d(TAG, strTimestamp);
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        try {
-            Date date = format.parse(strTimestamp);
-            return printDifference(date, Calendar.getInstance().getTime()) + " ago";
-        } catch (ParseException e) {
-            // TODO Auto-generated catch block
-            Log.d(TAG, e.toString());
-            return "Random";
-        }
-
     }
 
     public void changeDataset(JsonArray dataset) {
@@ -170,64 +111,67 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             JsonObject object = (JsonObject) data.get(position);
             ((TextView) holder.mLin.findViewById(R.id.post_name)).setText(object.get("name").getAsString());
             ((TextView) holder.mLin.findViewById(R.id.post_text)).setText(object.get("text").getAsString());
-            ((TextView) holder.mLin.findViewById(R.id.timestamp)).setText(convertTimestamp(object.get("timestamp").getAsString()));
+            ((TextView) holder.mLin.findViewById(R.id.timestamp)).setText(Utils.convertTimestamp(object.get("timestamp").getAsString()));
 
             JsonArray comments = object.getAsJsonArray("Comment");
-            LinearLayout linearLayout = (LinearLayout) holder.mLin.findViewById(R.id.comments);
-            int nchild = linearLayout.getChildCount();
-            for (int i = 1; i < nchild; i++) {
-                linearLayout.removeViewAt(i);
-            }
+
+            LinearLayout linearLayout = holder.mLin.findViewById(R.id.comments);
 
             if (comments.size() == 0) {
-                ( (TextView) linearLayout.findViewById(R.id.comments_text)).setText("No comments yet");
+                ( (TextView) holder.mLin.findViewById(R.id.comments_text)).setText("No comments yet");
             }
             else {
-                Log.d(TAG, "Comment here " + object.toString());
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                int len = Math.min(comments.size(), 3);
-                for (int i = 0; i != len; i++) {
-                    LinearLayout linearLayout1 = (LinearLayout) ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.comment, linearLayout, false);
+                holder.recyclerView = holder.mLin.findViewById(R.id.comments_recycler);
+                holder.commentAdapter = new CommentAdapter(comments);
+                LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
+                holder.recyclerView.setLayoutManager(linearLayoutManager);
+                holder.recyclerView.setAdapter(holder.commentAdapter);
 
-                    ((TextView) linearLayout1.findViewById(R.id.comment_name)).setText(comments.get(i).getAsJsonObject().get("name").getAsString());
-                    ((TextView) linearLayout1.findViewById(R.id.comment_text)).setText(comments.get(i).getAsJsonObject().get("text").getAsString());
-                    ((TextView) linearLayout1.findViewById(R.id.comment_timestamp)).setText(convertTimestamp(comments.get(i).getAsJsonObject().get("timestamp").getAsString()));
-                    linearLayout.addView(linearLayout1, params);
-                }
-                if (len < comments.size()) {
-                    Button button = new Button(context);
-                    button.setId(9399);
-                    button.setText("More");
-                    button.setOnClickListener(new MoreClickListener(comments, linearLayout));
-                    linearLayout.addView(button);
-                }
+//                Log.d(TAG, "Comment here " + object.toString());
+//                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+//                int len = Math.min(comments.size(), 3);
+//                for (int i = 0; i != len; i++) {
+//                    LinearLayout linearLayout1 = (LinearLayout) ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.comment, linearLayout, false);
+//
+//                    ((TextView) linearLayout1.findViewById(R.id.comment_name)).setText(comments.get(i).getAsJsonObject().get("name").getAsString());
+//                    ((TextView) linearLayout1.findViewById(R.id.comment_text)).setText(comments.get(i).getAsJsonObject().get("text").getAsString());
+//                    ((TextView) linearLayout1.findViewById(R.id.comment_timestamp)).setText(Utils.convertTimestamp(comments.get(i).getAsJsonObject().get("timestamp").getAsString()));
+//                    linearLayout.addView(linearLayout1, params);
+//                }
+//                if (len < comments.size()) {
+//                    Button button = new Button(context);
+//                    button.setId(9399);
+//                    button.setText("More");
+//                    button.setOnClickListener(new MoreClickListener(comments, linearLayout));
+//                    linearLayout.addView(button);
+//                }
             }
         }
     }
 
-    public class MoreClickListener implements View.OnClickListener {
-        JsonArray comments;
-        LinearLayout linearLayout;
-        MoreClickListener(JsonArray comments, LinearLayout linearLayout){
-            this.comments = comments;
-            this.linearLayout = linearLayout;
-        }
-
-        @SuppressLint("ResourceType")
-        @Override
-        public void onClick(View view) {
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            for (int i = 3; i < comments.size(); i++) {
-                LinearLayout linearLayout1 = (LinearLayout) ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.comment, linearLayout, false);
-
-                ((TextView) linearLayout1.findViewById(R.id.comment_name)).setText(comments.get(i).getAsJsonObject().get("name").getAsString());
-                ((TextView) linearLayout1.findViewById(R.id.comment_text)).setText(comments.get(i).getAsJsonObject().get("text").getAsString());
-                ((TextView) linearLayout1.findViewById(R.id.comment_timestamp)).setText(convertTimestamp(comments.get(i).getAsJsonObject().get("timestamp").getAsString()));
-                linearLayout.addView(linearLayout1, params);
-            }
-            linearLayout.removeView(linearLayout.findViewById(9399));
-        }
-    }
+//    public class MoreClickListener implements View.OnClickListener {
+//        JsonArray comments;
+//        LinearLayout linearLayout;
+//        MoreClickListener(JsonArray comments, LinearLayout linearLayout){
+//            this.comments = comments;
+//            this.linearLayout = linearLayout;
+//        }
+//
+//        @SuppressLint("ResourceType")
+//        @Override
+//        public void onClick(View view) {
+//            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+//            for (int i = 3; i < comments.size(); i++) {
+//                LinearLayout linearLayout1 = (LinearLayout) ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.comment, linearLayout, false);
+//
+//                ((TextView) linearLayout1.findViewById(R.id.comment_name)).setText(comments.get(i).getAsJsonObject().get("name").getAsString());
+//                ((TextView) linearLayout1.findViewById(R.id.comment_text)).setText(comments.get(i).getAsJsonObject().get("text").getAsString());
+//                ((TextView) linearLayout1.findViewById(R.id.comment_timestamp)).setText(Utils.convertTimestamp(comments.get(i).getAsJsonObject().get("timestamp").getAsString()));
+//                linearLayout.addView(linearLayout1, params);
+//            }
+//            linearLayout.removeView(linearLayout.findViewById(9399));
+//        }
+//    }
 
     @Override
     public int getItemCount() {

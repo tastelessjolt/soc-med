@@ -129,9 +129,9 @@ public class MainActivity extends AppCompatActivity {
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
-            mainFragment = MainFragment.newInstance(1);
-            mainFragment1 = MainFragment.newInstance(2);
-            profileFragment = ProfileFragment.newInstance(3);
+            mainFragment = MainFragment.newInstance(1, getApplicationContext());
+            mainFragment1 = MainFragment.newInstance(2, getApplicationContext());
+            profileFragment = ProfileFragment.newInstance(3, getApplicationContext());
         }
 
 

@@ -56,11 +56,17 @@ public class ProfileFragment extends CommonFragment {
      * @return A new instance of fragment ProfileFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ProfileFragment newInstance(int itemNumber) {
+    public static ProfileFragment newInstance(int itemNumber, Context context) {
         ProfileFragment fragment = new ProfileFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_ITEM_NUMBER, itemNumber);
         fragment.setArguments(args);
+
+        Intent intent = new Intent(context, NetworkService.class);
+        intent.putExtra(Constants.WHAT, Constants.GET_FEED);
+        context.startService(intent);
+
+
         return fragment;
     }
 

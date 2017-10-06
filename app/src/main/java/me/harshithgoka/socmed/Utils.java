@@ -10,7 +10,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -18,6 +22,9 @@ import java.util.List;
  */
 
 public class Utils {
+
+    public static final String TAG = Utils.class.getName();
+
     public static JsonParser jsonParser = new JsonParser();
 
     public static String getQuery(List<AbstractMap.SimpleEntry> params) throws UnsupportedEncodingException
@@ -54,5 +61,62 @@ public class Utils {
         }
 
         return jsonParser.parse(stringBuilder.toString()).getAsJsonObject();
+    }
+
+    public static String printDifference(Date startDate, Date endDate) {
+        //milliseconds
+        long different = endDate.getTime() - startDate.getTime();
+
+        long secondsInMilli = 1000;
+        long minutesInMilli = secondsInMilli * 60;
+        long hoursInMilli = minutesInMilli * 60;
+        long daysInMilli = hoursInMilli * 24;
+        long weeksInMilli = daysInMilli * 7;
+
+        long elapsedWeeks = different / weeksInMilli;
+
+        long elapsedDays = different / daysInMilli;
+        different = different % daysInMilli;
+
+        long elapsedHours = different / hoursInMilli;
+        different = different % hoursInMilli;
+
+        long elapsedMinutes = different / minutesInMilli;
+        different = different % minutesInMilli;
+
+        long elapsedSeconds = different / secondsInMilli;
+
+        if (elapsedWeeks > 0) {
+            return elapsedWeeks + "w";
+        }
+        else if (elapsedDays > 0) {
+            return elapsedDays + "d";
+        }
+        else if (elapsedHours > 0) {
+            return elapsedHours + "h";
+        }
+        else if (elapsedMinutes > 0) {
+            return elapsedMinutes + "m";
+        }
+        else if (elapsedSeconds > 0) {
+            return elapsedSeconds + "s";
+        }
+        else {
+            return "";
+        }
+    }
+
+    public static String convertTimestamp (String strtimestamp) {
+        String strTimestamp = strtimestamp.split("\\.")[0];
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            Date date = format.parse(strTimestamp);
+            return printDifference(date, Calendar.getInstance().getTime()) + " ago";
+        } catch (ParseException e) {
+            // TODO Auto-generated catch block
+            Log.d(TAG, e.toString());
+            return "Random";
+        }
+
     }
 }

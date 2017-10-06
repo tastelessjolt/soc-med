@@ -12,7 +12,7 @@ import java.lang.reflect.Type;
  */
 
 public final class Constants {
-    public static String URL = "http://192.168.42.2:8080/twitter-backend/";
+    public static String URL = "http://10.4.65.62:8080/twitter-backend/";
 
     public static String MISCSTATE = "MiscState";
     public static String LOGINSTATE = "LoginState";
