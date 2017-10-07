@@ -63,7 +63,7 @@ public class ProfileFragment extends CommonFragment {
         fragment.setArguments(args);
 
         Intent intent = new Intent(context, NetworkService.class);
-        intent.putExtra(Constants.WHAT, Constants.GET_FEED);
+        intent.putExtra(Constants.WHAT, Constants.GET_MY_POSTS);
         context.startService(intent);
 
 

@@ -18,6 +18,16 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
 
     public static final String TAG = CommentAdapter.class.getName();
     public static final int MAX_COMMENTS = 3;
+
+    public boolean isMore() {
+        return more;
+    }
+
+    public void setMore(boolean more) {
+        this.more = more;
+        notifyDataSetChanged();
+    }
+
     public boolean more;
     JsonArray comments;
     CommentAdapter (JsonArray data ) {

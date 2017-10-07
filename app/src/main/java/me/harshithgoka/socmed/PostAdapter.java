@@ -19,6 +19,7 @@ import com.google.gson.JsonObject;
 
 import org.w3c.dom.Text;
 
+import java.sql.BatchUpdateException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -101,7 +102,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
     @SuppressLint("ResourceType")
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, int position) {
         if (data == null) {
             ((TextView) holder.mLin.findViewById(R.id.post_name)).setText(dummy_dataset[position * 2]);
             ((TextView) holder.mLin.findViewById(R.id.post_text)).setText(dummy_dataset[position * 2 + 1]);
@@ -126,6 +127,24 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                 LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
                 holder.recyclerView.setLayoutManager(linearLayoutManager);
                 holder.recyclerView.setAdapter(holder.commentAdapter);
+                Button button = holder.mLin.findViewById(R.id.more);
+
+                button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        holder.commentAdapter.setMore(false);
+                        view.setVisibility(View.GONE);
+                    }
+                });
+
+                Log.d(TAG, "Comments size: " + comments.size() + " More: " + holder.commentAdapter.more);
+
+                if (comments.size() > 3 && holder.commentAdapter.more) {
+                    button.setVisibility(View.VISIBLE);
+                }
+                else {
+                    button.setVisibility(View.GONE);
+                }
 
 //                Log.d(TAG, "Comment here " + object.toString());
 //                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
