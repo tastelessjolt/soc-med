@@ -50,7 +50,6 @@ public class MainFragment extends CommonFragment {
      */
 
     public static final String TAG = MainFragment.class.getName();
-    private static final String ARG_SECTION_NUMBER = "section_number";
 
     public JsonArray getFeed() {
         return feed;
@@ -66,7 +65,7 @@ public class MainFragment extends CommonFragment {
             Collections.sort(posts, new Comparator<Post>() {
                 @Override
                 public int compare(Post post, Post t1) {
-                    return -post.timestamp.compareTo(t1.timestamp);
+                    return post.timestamp.compareTo(t1.timestamp);
                 }
             });
 

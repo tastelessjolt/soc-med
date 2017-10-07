@@ -9,9 +9,13 @@
 
     <string name="sample_text">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</string>
     <string name="sample_timestamp">3hrs ago</string>
+    <string name="sample_name">Zhang</string>
+    <string name="sample_email">foo@example.com</string>
+
 
     <string name="post_hint">Write what you think!</string>
     <string name="comment_hint">Write a comment!</string>
+    <string name="search_hint">Search...</string>
 
     <string name="action_sign_in">Log in</string>
     <string name="action_sign_in_short">Sign in</string>

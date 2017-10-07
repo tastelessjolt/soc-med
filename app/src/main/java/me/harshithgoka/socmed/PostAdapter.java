@@ -41,6 +41,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
     public String[] dummy_dataset;
 
+
+
     public void setData(JsonArray data) {
         this.data = data;
     }
@@ -48,6 +50,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     public JsonArray data = null;
     Context context;
     Constants.POSTS_TYPE type;
+    User user;
+
 
     // / Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -66,6 +70,13 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     public void changeDataset(JsonArray dataset) {
         data = dataset;
         notifyDataSetChanged();
+    }
+
+    public PostAdapter(Context context, JsonArray jsonElements, Constants.POSTS_TYPE userPosts, User user) {
+        this.type = userPosts;
+        this.context = context;
+        data = jsonElements;
+        this.user = user;
     }
 
     PostAdapter(Context context, JsonArray argdata, Constants.POSTS_TYPE type) {
@@ -88,7 +99,10 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                 intent.putExtra(Constants.WHAT, Constants.GET_MY_POSTS);
                 break;
             case USER_POSTS:
-                intent.putExtra(Constants.WHAT, Constants.GET_FEED);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable(Constants.USER_DATA, user);
+                intent.putExtra(Constants.WHAT, Constants.GET_USER_POSTS);
+                intent.putExtra(Constants.INTENT_DATA, bundle);
                 break;
         }
         context.startService(intent);

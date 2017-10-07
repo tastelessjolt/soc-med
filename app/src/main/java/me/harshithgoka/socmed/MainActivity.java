@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -115,6 +116,16 @@ public class MainActivity extends AppCompatActivity {
                             ((ProfileFragment) mSectionsPagerAdapter.getItem(2)).WriteComment(false, bundle);
                         }
                     }
+                    else if (type == Constants.POSTS_TYPE.USER_POSTS) {
+                        if (msg.arg1 == Constants.TRUE) {
+                            ((SearchFragment) mSectionsPagerAdapter.getItem(1)).WriteComment(true, bundle);
+                        } else if (msg.arg1 == Constants.FALSE) {
+                            ((SearchFragment) mSectionsPagerAdapter.getItem(1)).WriteComment(false, bundle);
+                        }
+                    }
+                }
+                else if (msg.what == Constants.GET_USER_POSTS) {
+                    ((SearchFragment) mSectionsPagerAdapter.getItem(1)).SetPosts((Bundle) msg.obj);
                 }
             }
         };
@@ -152,13 +163,14 @@ public class MainActivity extends AppCompatActivity {
 
         int count = 3;
 
-        MainFragment mainFragment, mainFragment1;
+        MainFragment mainFragment;
+        SearchFragment searchFragment;
         ProfileFragment profileFragment;
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
             mainFragment = MainFragment.newInstance(1, getApplicationContext());
-            mainFragment1 = MainFragment.newInstance(2, getApplicationContext());
+            searchFragment = SearchFragment.newInstance(2);
             profileFragment = ProfileFragment.newInstance(3, getApplicationContext());
         }
 
@@ -172,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
                 case 0:
                     return mainFragment;
                 case 1:
-                    return mainFragment1;
+                    return searchFragment;
                 case 2:
                     return profileFragment;
                 default:

@@ -39,10 +39,13 @@ public class NetworkService extends Service {
                 tHandler.sendMessage(tHandler.obtainMessage(Constants.GET_MY_POSTS));
             }
             else if (what == Constants.WRITE_POST) {
-                tHandler.sendMessage(tHandler.obtainMessage(Constants.WRITE_POST, intent.getStringExtra(Constants.INTENT_DATA)));
+                tHandler.sendMessage(tHandler.obtainMessage(what, intent.getStringExtra(Constants.INTENT_DATA)));
             }
             else if (what == Constants.WRITE_COMMENT) {
-                tHandler.sendMessage(tHandler.obtainMessage(Constants.WRITE_COMMENT, intent.getBundleExtra(Constants.INTENT_DATA)));
+                tHandler.sendMessage(tHandler.obtainMessage(what, intent.getBundleExtra(Constants.INTENT_DATA)));
+            }
+            else if (what == Constants.GET_USER_POSTS) {
+                tHandler.sendMessage(tHandler.obtainMessage(what, intent.getBundleExtra(Constants.INTENT_DATA)));
             }
         }
 
@@ -110,6 +113,9 @@ public class NetworkService extends Service {
             else {
                 Constants.currHandler.sendMessage(Constants.currHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_LOGGED_IN));
             }
+        }
+        else if (msg.what == Constants.GET_USER_POSTS) {
+            Constants.currHandler.sendMessage(Constants.currHandler.obtainMessage(Constants.GET_USER_POSTS, msg.obj));
         }
         tHandler.dispatchMessage(tHandler.obtainMessage(Constants.ACK, "Cool!"));
     }

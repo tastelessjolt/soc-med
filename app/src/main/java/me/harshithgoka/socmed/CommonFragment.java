@@ -17,6 +17,9 @@ import android.widget.Toast;
  */
 
 public class CommonFragment extends Fragment {
+
+    public static final String ARG_SECTION_NUMBER = "section_number";
+
     SwipeRefreshLayout swipeRefreshLayout;
     RecyclerView recyclerView;
     PostAdapter adapter;
@@ -24,7 +27,8 @@ public class CommonFragment extends Fragment {
 
 
     public void stopRefresh() {
-        swipeRefreshLayout.setRefreshing(false);
+        if (swipeRefreshLayout != null)
+            swipeRefreshLayout.setRefreshing(false);
     }
 
     public void WriteComment(boolean success, Bundle bundle) {

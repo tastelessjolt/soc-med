@@ -31,7 +31,6 @@ public class ProfileFragment extends CommonFragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     public static final String TAG = ProfileFragment.class.getName();
-    private static final String ARG_ITEM_NUMBER = "item_number";
 
     // TODO: Rename and change types of parameters
     private int itemNumber;
@@ -55,7 +54,7 @@ public class ProfileFragment extends CommonFragment {
     public static ProfileFragment newInstance(int itemNumber, Context context) {
         ProfileFragment fragment = new ProfileFragment();
         Bundle args = new Bundle();
-        args.putInt(ARG_ITEM_NUMBER, itemNumber);
+        args.putInt(ARG_SECTION_NUMBER, itemNumber);
         fragment.setArguments(args);
 
         Intent intent = new Intent(context, NetworkService.class);
@@ -70,7 +69,7 @@ public class ProfileFragment extends CommonFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            itemNumber = getArguments().getInt(ARG_ITEM_NUMBER);
+            itemNumber = getArguments().getInt(ARG_SECTION_NUMBER);
         }
     }
 

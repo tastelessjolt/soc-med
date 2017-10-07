@@ -27,6 +27,8 @@ public final class Constants {
     public static String COMMENT_TEXT = "CommentText";
     public static String SRC_FRAGMENT = "SrcFragment";
     public static String POST_POS = "PostPos";
+    public static String USER_DATA = "UserData";
+    public static String POSTS = "Posts";
 
     public static int ACK = 0;
     public static int GET_NETWORK_STATE = 1;
@@ -34,6 +36,7 @@ public final class Constants {
     public static int GET_MY_POSTS = 3;
     public static int WRITE_POST = 4;
     public static int WRITE_COMMENT = 5;
+    public static int GET_USER_POSTS = 6;
 
     public static int TRUE = 93;
     public static int FALSE = 39;
