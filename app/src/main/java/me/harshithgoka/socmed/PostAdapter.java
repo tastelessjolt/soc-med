@@ -3,7 +3,9 @@ package me.harshithgoka.socmed;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.IdRes;
+import android.support.design.widget.TextInputEditText;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -11,7 +13,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.gson.JsonArray;
@@ -100,6 +105,10 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         return vh;
     }
 
+    public void WriteComment () {
+
+    }
+
     @SuppressLint("ResourceType")
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
@@ -118,79 +127,82 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
             LinearLayout linearLayout = holder.mLin.findViewById(R.id.comments);
 
-            if (comments.size() == 0) {
-                ( (TextView) holder.mLin.findViewById(R.id.comments_text)).setText("No comments yet");
+            holder.recyclerView = holder.mLin.findViewById(R.id.comments_recycler);
+            holder.commentAdapter = new CommentAdapter(comments);
+            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
+            holder.recyclerView.setLayoutManager(linearLayoutManager);
+            holder.recyclerView.setAdapter(holder.commentAdapter);
+            Button button = holder.mLin.findViewById(R.id.more);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    holder.commentAdapter.setMore(false);
+                    view.setVisibility(View.GONE);
+                }
+            });
+
+            RelativeLayout commentButton = (RelativeLayout) holder.mLin.findViewById(R.id.post_button);
+            ImageView imageView = (ImageView) holder.mLin.findViewById(R.id.comment_img);
+            ProgressBar progressBar = (ProgressBar) holder.mLin.findViewById(R.id.comment_progress);
+            TextInputEditText editText = (TextInputEditText) holder.mLin.findViewById(R.id.write_comment);
+
+            commentButton.setOnClickListener(new CommentClickListener(position, object.get("postid").getAsInt(), imageView, progressBar, editText));
+
+            Log.d(TAG, "Comments size: " + comments.size() + " More: " + holder.commentAdapter.more);
+
+            if (comments.size() > 3 && holder.commentAdapter.more) {
+                button.setVisibility(View.VISIBLE);
             }
             else {
-                holder.recyclerView = holder.mLin.findViewById(R.id.comments_recycler);
-                holder.commentAdapter = new CommentAdapter(comments);
-                LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
-                holder.recyclerView.setLayoutManager(linearLayoutManager);
-                holder.recyclerView.setAdapter(holder.commentAdapter);
-                Button button = holder.mLin.findViewById(R.id.more);
+                button.setVisibility(View.GONE);
+            }
 
-                button.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        holder.commentAdapter.setMore(false);
-                        view.setVisibility(View.GONE);
-                    }
-                });
-
-                Log.d(TAG, "Comments size: " + comments.size() + " More: " + holder.commentAdapter.more);
-
-                if (comments.size() > 3 && holder.commentAdapter.more) {
-                    button.setVisibility(View.VISIBLE);
-                }
-                else {
-                    button.setVisibility(View.GONE);
-                }
-
-//                Log.d(TAG, "Comment here " + object.toString());
-//                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-//                int len = Math.min(comments.size(), 3);
-//                for (int i = 0; i != len; i++) {
-//                    LinearLayout linearLayout1 = (LinearLayout) ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.comment, linearLayout, false);
-//
-//                    ((TextView) linearLayout1.findViewById(R.id.comment_name)).setText(comments.get(i).getAsJsonObject().get("name").getAsString());
-//                    ((TextView) linearLayout1.findViewById(R.id.comment_text)).setText(comments.get(i).getAsJsonObject().get("text").getAsString());
-//                    ((TextView) linearLayout1.findViewById(R.id.comment_timestamp)).setText(Utils.convertTimestamp(comments.get(i).getAsJsonObject().get("timestamp").getAsString()));
-//                    linearLayout.addView(linearLayout1, params);
-//                }
-//                if (len < comments.size()) {
-//                    Button button = new Button(context);
-//                    button.setId(9399);
-//                    button.setText("More");
-//                    button.setOnClickListener(new MoreClickListener(comments, linearLayout));
-//                    linearLayout.addView(button);
-//                }
+            if (comments.size() == 0) {
+                ( (TextView) holder.mLin.findViewById(R.id.comments_text)).setText("No comments yet");
             }
         }
     }
 
-//    public class MoreClickListener implements View.OnClickListener {
-//        JsonArray comments;
-//        LinearLayout linearLayout;
-//        MoreClickListener(JsonArray comments, LinearLayout linearLayout){
-//            this.comments = comments;
-//            this.linearLayout = linearLayout;
-//        }
-//
-//        @SuppressLint("ResourceType")
-//        @Override
-//        public void onClick(View view) {
-//            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-//            for (int i = 3; i < comments.size(); i++) {
-//                LinearLayout linearLayout1 = (LinearLayout) ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.comment, linearLayout, false);
-//
-//                ((TextView) linearLayout1.findViewById(R.id.comment_name)).setText(comments.get(i).getAsJsonObject().get("name").getAsString());
-//                ((TextView) linearLayout1.findViewById(R.id.comment_text)).setText(comments.get(i).getAsJsonObject().get("text").getAsString());
-//                ((TextView) linearLayout1.findViewById(R.id.comment_timestamp)).setText(Utils.convertTimestamp(comments.get(i).getAsJsonObject().get("timestamp").getAsString()));
-//                linearLayout.addView(linearLayout1, params);
-//            }
-//            linearLayout.removeView(linearLayout.findViewById(9399));
-//        }
-//    }
+    public class CommentClickListener implements View.OnClickListener {
+        int postid;
+        int position;
+        ImageView imageView;
+        ProgressBar progressBar;
+        TextInputEditText editText;
+
+
+        CommentClickListener(int position, int postid, ImageView imageView, ProgressBar progressBar, TextInputEditText editText){
+            this.position = position;
+            this.postid = postid;
+            this.imageView = imageView;
+            this.progressBar = progressBar;
+            this.editText = editText;
+        }
+
+        @SuppressLint("ResourceType")
+        @Override
+        public void onClick(View view) {
+            String comment = editText.getText().toString();
+            comment = comment.trim();
+            if (!comment.equals("")) {
+                imageView.setVisibility(View.GONE);
+                progressBar.setVisibility(View.VISIBLE);
+
+                Intent intent = new Intent(context, NetworkService.class);
+                intent.putExtra(Constants.WHAT, Constants.WRITE_COMMENT);
+
+                Bundle bundle = new Bundle();
+                bundle.putSerializable(Constants.SRC_FRAGMENT, type);
+                bundle.putInt(Constants.POST_ID, postid);
+                bundle.putString(Constants.COMMENT_TEXT, comment);
+                bundle.putInt(Constants.POST_POS, position);
+
+                intent.putExtra(Constants.INTENT_DATA, bundle);
+
+                context.startService(intent);
+            }
+        }
+    }
 
     @Override
     public int getItemCount() {

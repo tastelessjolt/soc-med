@@ -38,7 +38,6 @@ public class ProfileFragment extends CommonFragment {
 
     private RecyclerView recyclerView;
     private PostAdapter adapter;
-    private LinearLayoutManager linearLayoutManager;
 
     private OnFragmentInteractionListener mListener;
 

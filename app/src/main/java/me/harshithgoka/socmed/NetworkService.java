@@ -2,6 +2,7 @@ package me.harshithgoka.socmed;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -36,6 +37,12 @@ public class NetworkService extends Service {
             }
             else if (what == Constants.GET_MY_POSTS) {
                 tHandler.sendMessage(tHandler.obtainMessage(Constants.GET_MY_POSTS));
+            }
+            else if (what == Constants.WRITE_POST) {
+                tHandler.sendMessage(tHandler.obtainMessage(Constants.WRITE_POST, intent.getStringExtra(Constants.INTENT_DATA)));
+            }
+            else if (what == Constants.WRITE_COMMENT) {
+                tHandler.sendMessage(tHandler.obtainMessage(Constants.WRITE_COMMENT, intent.getBundleExtra(Constants.INTENT_DATA)));
             }
         }
 
@@ -80,6 +87,28 @@ public class NetworkService extends Service {
                 if (Constants.currHandler != null) {
                     Constants.currHandler.sendMessage(Constants.currHandler.obtainMessage(Constants.GET_MY_POSTS, jsonObject));
                 }
+            }
+        }
+        else if (msg.what == Constants.WRITE_POST) {
+            if (msg.arg1 == Constants.TRUE ) {
+                Constants.currHandler.sendMessage(Constants.currHandler.obtainMessage(Constants.WRITE_POST, Constants.TRUE, 0, null));
+            }
+            else if (msg.arg1 == Constants.FALSE) {
+                Constants.currHandler.sendMessage(Constants.currHandler.obtainMessage(Constants.WRITE_POST, Constants.FALSE, 0, null));
+            }
+            else {
+                Constants.currHandler.sendMessage(Constants.currHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_LOGGED_IN));
+            }
+        }
+        else if (msg.what == Constants.WRITE_COMMENT) {
+            if (msg.arg1 == Constants.TRUE ) {
+                Constants.currHandler.sendMessage(Constants.currHandler.obtainMessage(Constants.WRITE_COMMENT, Constants.TRUE, 0, msg.obj));
+            }
+            else if (msg.arg1 == Constants.FALSE) {
+                Constants.currHandler.sendMessage(Constants.currHandler.obtainMessage(Constants.WRITE_COMMENT, Constants.FALSE, 0, msg.obj));
+            }
+            else {
+                Constants.currHandler.sendMessage(Constants.currHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_LOGGED_IN));
             }
         }
         tHandler.dispatchMessage(tHandler.obtainMessage(Constants.ACK, "Cool!"));

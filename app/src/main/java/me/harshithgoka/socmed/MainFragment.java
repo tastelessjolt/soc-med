@@ -3,6 +3,7 @@ package me.harshithgoka.socmed;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -11,7 +12,14 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.JsonArray;
 
@@ -54,7 +62,10 @@ public class MainFragment extends CommonFragment {
 
     RecyclerView recyclerView;
     PostAdapter adapter;
-    LinearLayoutManager linearLayoutManager;
+
+    TextInputEditText editText;
+    ProgressBar progressBar;
+    TextView postButtonText;
 
     public MainFragment() {
 
@@ -77,6 +88,45 @@ public class MainFragment extends CommonFragment {
         return fragment;
     }
 
+    public class SendPostOnClickListener implements OnClickListener {
+
+        TextInputEditText editText;
+        ProgressBar progressBar;
+        TextView textView;
+        SendPostOnClickListener(TextInputEditText editText, ProgressBar progressBar, TextView textView) {
+            this.editText = editText;
+            this.progressBar = progressBar;
+            this.textView = textView;
+        }
+
+        @Override
+        public void onClick(View view) {
+            String postText = editText.getText().toString();
+            postText = postText.trim();
+            if( !postText.equals("") ) {
+                Intent intent = new Intent(getContext(), NetworkService.class);
+                intent.putExtra(Constants.WHAT, Constants.WRITE_POST);
+                intent.putExtra(Constants.INTENT_DATA, postText);
+                getContext().startService(intent);
+                progressBar.setVisibility(View.VISIBLE);
+                textView.setVisibility(View.GONE);
+            }
+
+        }
+    }
+
+    public void WritePost(boolean success) {
+        progressBar.setVisibility(View.GONE);
+        postButtonText.setVisibility(View.VISIBLE);
+
+        if (success) {
+            editText.setText("");
+            Toast.makeText(getContext(), "Post Successful", Toast.LENGTH_SHORT).show();
+        }
+        else {
+            Toast.makeText(getContext(), "Post unsuccessful. Please contact us on our website.", Toast.LENGTH_LONG).show();
+        }
+    }
 
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
@@ -90,6 +140,14 @@ public class MainFragment extends CommonFragment {
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setHasFixedSize(true);
+
+        RelativeLayout postButton = (RelativeLayout) rootView.findViewById(R.id.post_button);
+        editText = (TextInputEditText) rootView.findViewById(R.id.write_post);
+        progressBar = (ProgressBar) rootView.findViewById(R.id.write_post_progress);
+        postButtonText = (TextView) rootView.findViewById(R.id.post_button_text);
+
+
+        postButton.setOnClickListener(new SendPostOnClickListener(editText, progressBar, postButtonText));
 
         swipeRefreshLayout = rootView.findViewById(R.id.swiperefresh);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {

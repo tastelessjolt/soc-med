@@ -1,5 +1,6 @@
 package me.harshithgoka.socmed;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
@@ -45,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
 
     private CookieManager cookieManager;
 
+    @SuppressLint("HandlerLeak")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,6 +88,32 @@ public class MainActivity extends AppCompatActivity {
                     JsonObject jsonObject = (JsonObject) msg.obj;
                     if (jsonObject != null) {
                         ( (ProfileFragment) mSectionsPagerAdapter.getItem(2)).setData(jsonObject.get("data").getAsJsonArray());
+                    }
+                }
+                else if (msg.what == Constants.WRITE_POST) {
+                    if (msg.arg1 == Constants.TRUE) {
+                        ((MainFragment) mSectionsPagerAdapter.getItem(0)).WritePost(true);
+                    }
+                    else if (msg.arg1 == Constants.FALSE) {
+                        ((MainFragment) mSectionsPagerAdapter.getItem(0)).WritePost(false);
+                    }
+                }
+                else if (msg.what == Constants.WRITE_COMMENT) {
+                    Bundle bundle = (Bundle) msg.obj;
+                    Constants.POSTS_TYPE type = (Constants.POSTS_TYPE) bundle.getSerializable(Constants.SRC_FRAGMENT);
+                    if (type == Constants.POSTS_TYPE.FEED) {
+                        if (msg.arg1 == Constants.TRUE) {
+                            ((MainFragment) mSectionsPagerAdapter.getItem(0)).WriteComment(true, bundle);
+                        } else if (msg.arg1 == Constants.FALSE) {
+                            ((MainFragment) mSectionsPagerAdapter.getItem(0)).WriteComment(false, bundle);
+                        }
+                    }
+                    else if (type == Constants.POSTS_TYPE.MY_POSTS) {
+                        if (msg.arg1 == Constants.TRUE) {
+                            ((ProfileFragment) mSectionsPagerAdapter.getItem(2)).WriteComment(true, bundle);
+                        } else if (msg.arg1 == Constants.FALSE) {
+                            ((ProfileFragment) mSectionsPagerAdapter.getItem(2)).WriteComment(false, bundle);
+                        }
                     }
                 }
             }

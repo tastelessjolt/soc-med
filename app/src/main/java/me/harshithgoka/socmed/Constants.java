@@ -17,12 +17,23 @@ public final class Constants {
     public static String MISCSTATE = "MiscState";
     public static String LOGINSTATE = "LoginState";
 
-    public static String INTENT_DATA = "IntentData";
     public static String WHAT = "what";
+    public static String INTENT_DATA = "IntentData";
+    public static String POST_ID = "PostId";
+    public static String COMMENT_TEXT = "CommentText";
+    public static String SRC_FRAGMENT = "SrcFragment";
+    public static String POST_POS = "PostPos";
+
     public static int ACK = 0;
     public static int GET_NETWORK_STATE = 1;
     public static int GET_FEED = 2;
     public static int GET_MY_POSTS = 3;
+    public static int WRITE_POST = 4;
+    public static int WRITE_COMMENT = 5;
+
+    public static int TRUE = 93;
+    public static int FALSE = 39;
+
     public enum NETWORK_STATE {
         LOGGED_IN, NOT_LOGGED_IN, NOT_CONNECTED
 

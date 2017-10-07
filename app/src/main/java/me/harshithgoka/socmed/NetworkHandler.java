@@ -1,5 +1,6 @@
 package me.harshithgoka.socmed;
 
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -10,9 +11,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.CookieManager;
 import java.net.HttpCookie;
 import java.net.HttpURLConnection;
@@ -154,6 +157,115 @@ public class NetworkHandler extends Handler {
                 } finally {
                     connection.disconnect();
                 }
+            } catch (MalformedURLException e) {
+                Log.d(TAG, e.toString());
+                sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
+            } catch (IOException e) {
+                Log.d(TAG, e.toString());
+                sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
+            }
+        }
+
+        else if (msg.what == Constants.WRITE_POST) {
+            try {
+                URL url = new URL(Constants.URL + "CreatePost");
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                try {
+                    connection.setRequestMethod("POST");
+                    connection.setDoOutput(true);
+                    connection.setDoInput(true);
+
+                    List<AbstractMap.SimpleEntry> list = new ArrayList<AbstractMap.SimpleEntry>();
+                    list.add(new AbstractMap.SimpleEntry("content", (String) msg.obj));
+
+                    OutputStream os = connection.getOutputStream();
+                    BufferedWriter writer = new BufferedWriter(
+                            new OutputStreamWriter(os, "UTF-8"));
+                    writer.write(Utils.getQuery(list));
+                    writer.flush();
+                    writer.close();
+                    os.close();
+
+                    connection.getHeaderFields();
+
+                    if (!url.getHost().equals(connection.getURL().getHost())) {
+                        // we were redirected! Kick the user out to the browser to sign on?
+                        throw new Exception("Login to your internet provider");
+                    }
+
+
+                    JsonObject response = Utils.getAndParse(connection.getInputStream());
+                    Log.d(TAG, response.toString());
+
+                    if (response.get("status").getAsBoolean()) {
+                        sHandler.sendMessage(sHandler.obtainMessage(Constants.WRITE_POST, Constants.TRUE, 0, null));
+                    } else {
+                        sHandler.sendMessage(sHandler.obtainMessage(Constants.WRITE_POST, Constants.FALSE, 0, null));
+                    }
+
+
+                } catch (Exception e) {
+                    Log.d(TAG, e.toString());
+                    sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
+                } finally {
+                    connection.disconnect();
+                }
+
+            } catch (MalformedURLException e) {
+                Log.d(TAG, e.toString());
+                sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
+            } catch (IOException e) {
+                Log.d(TAG, e.toString());
+                sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
+            }
+        }
+        else if (msg.what == Constants.WRITE_COMMENT) {
+            Bundle bundle = (Bundle) msg.obj;
+            try {
+                URL url = new URL(Constants.URL + "NewComment");
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+                try {
+                    connection.setRequestMethod("POST");
+                    connection.setDoOutput(true);
+                    connection.setDoInput(true);
+
+                    List<AbstractMap.SimpleEntry> list = new ArrayList<AbstractMap.SimpleEntry>();
+                    list.add(new AbstractMap.SimpleEntry("postid", "" + bundle.getInt(Constants.POST_ID)));
+                    list.add(new AbstractMap.SimpleEntry("content", (String) bundle.getString(Constants.COMMENT_TEXT)));
+
+                    OutputStream os = connection.getOutputStream();
+                    BufferedWriter writer = new BufferedWriter(
+                            new OutputStreamWriter(os, "UTF-8"));
+                    writer.write(Utils.getQuery(list));
+                    writer.flush();
+                    writer.close();
+                    os.close();
+
+                    connection.getHeaderFields();
+
+                    if (!url.getHost().equals(connection.getURL().getHost())) {
+                        // we were redirected! Kick the user out to the browser to sign on?
+                        throw new Exception("Login to your internet provider");
+                    }
+
+
+                    JsonObject response = Utils.getAndParse(connection.getInputStream());
+                    Log.d(TAG, response.toString());
+
+                    if (response.get("status").getAsBoolean()) {
+                        sHandler.sendMessage(sHandler.obtainMessage(Constants.WRITE_COMMENT, Constants.TRUE, 0, bundle));
+                    } else {
+                        sHandler.sendMessage(sHandler.obtainMessage(Constants.WRITE_COMMENT, Constants.FALSE, 0, bundle));
+                    }
+
+                } catch (Exception e) {
+                    Log.d(TAG, e.toString());
+                    sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
+                } finally {
+                    connection.disconnect();
+                }
+
             } catch (MalformedURLException e) {
                 Log.d(TAG, e.toString());
                 sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
