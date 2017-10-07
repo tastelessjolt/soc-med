@@ -128,7 +128,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             LinearLayout linearLayout = holder.mLin.findViewById(R.id.comments);
 
             holder.recyclerView = holder.mLin.findViewById(R.id.comments_recycler);
-            holder.commentAdapter = new CommentAdapter(comments);
+            holder.commentAdapter = new CommentAdapter(object, comments);
             LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
             holder.recyclerView.setLayoutManager(linearLayoutManager);
             holder.recyclerView.setAdapter(holder.commentAdapter);
@@ -159,6 +159,9 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
             if (comments.size() == 0) {
                 ( (TextView) holder.mLin.findViewById(R.id.comments_text)).setText("No comments yet");
+            }
+            else {
+                ( (TextView) holder.mLin.findViewById(R.id.comments_text)).setText("Comments");
             }
         }
     }

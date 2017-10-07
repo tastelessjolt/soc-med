@@ -280,6 +280,7 @@ public class LoginActivity extends AppCompatActivity {
                     Log.d(TAG, response.toString());
                     if (response.get("status").getAsBoolean()) {
                         ret = "true";
+                        Storage.setName(response.get("data").getAsString());
                     }
                     else {
                         ret = response.get("message").getAsString();

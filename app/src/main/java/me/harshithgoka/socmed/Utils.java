@@ -102,7 +102,7 @@ public class Utils {
             return elapsedSeconds + "s";
         }
         else {
-            return "";
+            return "0s";
         }
     }
 

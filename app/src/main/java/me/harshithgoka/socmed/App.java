@@ -20,5 +20,7 @@ public class App extends Application {
 
         CookieManager cookieManager = new CookieManager(new MyCookieStore(getApplicationContext()), CookiePolicy.ACCEPT_ALL);
         CookieHandler.setDefault(cookieManager);
+
+        Storage.Init(getApplicationContext());
     }
 }

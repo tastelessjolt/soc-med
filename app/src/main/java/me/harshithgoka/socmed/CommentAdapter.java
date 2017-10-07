@@ -1,13 +1,27 @@
 package me.harshithgoka.socmed;
 
+import android.content.Context;
+import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Created by harshithgoka on 06/10/17.
@@ -30,9 +44,44 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
 
     public boolean more;
     JsonArray comments;
-    CommentAdapter (JsonArray data ) {
+    JsonObject object;
+    CommentAdapter (JsonObject object, JsonArray data ) {
+        this.object = object;
         comments = data;
         more = true;
+    }
+
+    public void AddComment(Bundle bundle) {
+        if (bundle != null) {
+            JsonObject jsonObject = new JsonObject();
+
+            String comment = bundle.getString(Constants.COMMENT_TEXT);
+            Date time = Calendar.getInstance().getTime();
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+            String timestamp = format.format(time);
+
+            int postid = bundle.getInt(Constants.POST_ID);
+
+            Gson gson = new Gson();
+            Type listType = new TypeToken<List<Comment>>() {}.getType();
+            List<Comment> commentList = gson.fromJson(comments,listType);
+            commentList.add(new Comment("", Storage.getName(), postid, comment, timestamp));
+
+            Collections.sort(commentList, new Comparator<Comment>() {
+                @Override
+                public int compare(Comment comment, Comment t1) {
+                    return comment.timestamp.compareTo(t1.timestamp);
+                }
+            });
+
+            JsonParser jsonParser = new JsonParser();
+            comments = jsonParser.parse(gson.toJson(commentList)).getAsJsonArray();
+
+            object.remove("Comment");
+            object.add("Comment", comments);
+
+            notifyDataSetChanged();
+        }
     }
 
     @Override

@@ -21,7 +21,15 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 
 /**
@@ -49,9 +57,32 @@ public class MainFragment extends CommonFragment {
     }
 
     public void setData(JsonArray feed) {
-        MainFragment.feed = feed;
+        if (feed != null) {
+
+            Gson gson = new Gson();
+            Type listType = new TypeToken<List<Post>>() {}.getType();
+
+            List<Post> posts = gson.fromJson(feed, listType);
+            Collections.sort(posts, new Comparator<Post>() {
+                @Override
+                public int compare(Post post, Post t1) {
+                    return -post.timestamp.compareTo(t1.timestamp);
+                }
+            });
+
+//            for (Post post:
+//                 posts) {
+//                System.out.println(post.timestamp);
+//            }
+
+            JsonParser jsonParser = new JsonParser();
+            MainFragment.feed = jsonParser.parse(gson.toJson(posts)).getAsJsonArray();
+        }
+        else {
+            MainFragment.feed = feed;
+        }
         if (adapter != null) {
-            adapter.changeDataset(feed);
+            adapter.changeDataset(MainFragment.feed);
         }
         if (swipeRefreshLayout != null) {
             swipeRefreshLayout.setRefreshing(false);
@@ -60,8 +91,6 @@ public class MainFragment extends CommonFragment {
 
     private static JsonArray feed;
 
-    RecyclerView recyclerView;
-    PostAdapter adapter;
 
     TextInputEditText editText;
     ProgressBar progressBar;
@@ -121,7 +150,7 @@ public class MainFragment extends CommonFragment {
 
         if (success) {
             editText.setText("");
-            Toast.makeText(getContext(), "Post Successful", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Post Successful, Please refresh to see your post.", Toast.LENGTH_SHORT).show();
         }
         else {
             Toast.makeText(getContext(), "Post unsuccessful. Please contact us on our website.", Toast.LENGTH_LONG).show();

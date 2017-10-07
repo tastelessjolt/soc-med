@@ -14,8 +14,12 @@ import java.lang.reflect.Type;
 public final class Constants {
     public static String URL = "http://10.4.65.62:8080/twitter-backend/";
 
+
+    public static String Name = "";
     public static String MISCSTATE = "MiscState";
     public static String LOGINSTATE = "LoginState";
+    public static String USERSTATE = "UserState";
+    public static String NAME = "Name";
 
     public static String WHAT = "what";
     public static String INTENT_DATA = "IntentData";

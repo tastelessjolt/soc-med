@@ -6,6 +6,7 @@ import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -17,6 +18,8 @@ import android.widget.Toast;
 
 public class CommonFragment extends Fragment {
     SwipeRefreshLayout swipeRefreshLayout;
+    RecyclerView recyclerView;
+    PostAdapter adapter;
     LinearLayoutManager linearLayoutManager;
 
 
@@ -26,6 +29,10 @@ public class CommonFragment extends Fragment {
 
     public void WriteComment(boolean success, Bundle bundle) {
         View rootView = linearLayoutManager.findViewByPosition(bundle.getInt(Constants.POST_POS));
+        RecyclerView recyclerView1 = rootView.findViewById(R.id.comments_recycler);
+        CommentAdapter commentAdapter = ( (CommentAdapter) recyclerView1.getAdapter());
+        commentAdapter.AddComment(bundle);
+
         ImageView imageView = (ImageView) rootView.findViewById(R.id.comment_img);
         ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.comment_progress);
         TextInputEditText editText = (TextInputEditText) rootView.findViewById(R.id.write_comment);

@@ -73,6 +73,7 @@ public class NetworkHandler extends Handler {
 
                     if (response.get("status").getAsBoolean()) {
                         state = Constants.NETWORK_STATE.LOGGED_IN;
+                        Storage.setName(response.get("data").getAsString());
                     } else {
                         state = Constants.NETWORK_STATE.NOT_LOGGED_IN;
                     }

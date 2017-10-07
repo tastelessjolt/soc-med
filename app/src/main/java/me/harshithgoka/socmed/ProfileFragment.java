@@ -36,9 +36,6 @@ public class ProfileFragment extends CommonFragment {
     // TODO: Rename and change types of parameters
     private int itemNumber;
 
-    private RecyclerView recyclerView;
-    private PostAdapter adapter;
-
     private OnFragmentInteractionListener mListener;
 
     public static JsonArray myPosts;
@@ -93,6 +90,9 @@ public class ProfileFragment extends CommonFragment {
             }
         });
 
+        TextView textView = rootView.findViewById(R.id.name);
+        textView.setText(Storage.getName());
+
         recyclerView = (RecyclerView) rootView.findViewById(R.id.profile_recycler);
         adapter = new PostAdapter(getContext(), ProfileFragment.myPosts, Constants.POSTS_TYPE.MY_POSTS);
 
@@ -101,6 +101,7 @@ public class ProfileFragment extends CommonFragment {
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setHasFixedSize(true);
+
 
 
         swipeRefreshLayout = rootView.findViewById(R.id.profileswiperefresh);
