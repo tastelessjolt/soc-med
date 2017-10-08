@@ -257,7 +257,7 @@ public class SearchFragment extends CommonFragment {
                 public void onRefresh() {
                     if (adapter != null) {
                         adapter.refreshDataset();
-                        swipeRefreshLayout.setRefreshing(true);
+
                     }
                 }
             });

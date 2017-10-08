@@ -27,6 +27,8 @@
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
+    <string name="error_username_taken">Username already taken</string>
+    <string name="error_backend">Server Error</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>

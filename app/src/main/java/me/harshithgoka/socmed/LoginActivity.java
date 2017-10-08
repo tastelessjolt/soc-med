@@ -105,6 +105,15 @@ public class LoginActivity extends AppCompatActivity {
             }
         }
 
+        Button mRegisterButton = findViewById(R.id.register_button);
+        mRegisterButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), RegisterActivity.class);
+                startActivity(intent);
+            }
+        });
+
 
         // Set up the login form.
         mUsernameView = (EditText) findViewById(R.id.username);

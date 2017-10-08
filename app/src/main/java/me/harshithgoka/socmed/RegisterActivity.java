@@ -3,6 +3,9 @@ package me.harshithgoka.socmed;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Intent;
+import android.provider.Settings;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 
 import android.os.AsyncTask;
@@ -145,7 +148,7 @@ public class RegisterActivity extends AppCompatActivity {
             mUsernameView.setError(getString(R.string.error_field_required));
             focusView = mUsernameView;
             cancel = true;
-        } else if (!isEmailValid(username)) {
+        } else if (!isUsernameValid(username)) {
             mUsernameView.setError(getString(R.string.error_invalid_username));
             focusView = mUsernameView;
             cancel = true;
@@ -231,7 +234,7 @@ public class RegisterActivity extends AppCompatActivity {
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserRegisterTask extends AsyncTask<Void, Void, Boolean> {
+    public class UserRegisterTask extends AsyncTask<Void, Void, String> {
 
         private final String TAG = UserRegisterTask.class.getName();
 
@@ -248,9 +251,9 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
+        protected String doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
-
+            String ret = "";
             try {
                 // Simulate network access.
                 URL url = new URL(Constants.URL + "Register");
@@ -262,7 +265,9 @@ public class RegisterActivity extends AppCompatActivity {
                     connection.setDoInput(true);
 
                     List<AbstractMap.SimpleEntry> parameters = new ArrayList<AbstractMap.SimpleEntry>();
-                    parameters.add(new AbstractMap.SimpleEntry<String, String>("id", mUsername));
+                    parameters.add(new AbstractMap.SimpleEntry<String, String>("name", mName));
+                    parameters.add(new AbstractMap.SimpleEntry<String, String>("uid", mUsername));
+                    parameters.add(new AbstractMap.SimpleEntry<String, String>("email", mEmail));
                     parameters.add(new AbstractMap.SimpleEntry<String, String>("password", mPassword));
 
                     OutputStream os = connection.getOutputStream();
@@ -284,7 +289,10 @@ public class RegisterActivity extends AppCompatActivity {
                     Log.d(TAG, response.toString());
 
                     if (response.get("status").getAsBoolean()) {
-
+                        ret = "true";
+                    }
+                    else {
+                        ret = response.get("message").getAsString();
                     }
 
                 } catch (Exception e) {
@@ -299,28 +307,43 @@ public class RegisterActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
-
-            // TODO: register the new account here.
-            return true;
+            return ret;
         }
 
         @Override
-        protected void onPostExecute(final Boolean success) {
+        protected void onPostExecute(final String success) {
             mAuthTask = null;
             showProgress(false);
 
-            if (success) {
-                finish();
+            if (success.equals("true")) {
+                Snackbar snackbar = Snackbar.make(mProgressView.getRootView(), "Successfully Register. You can now login", Snackbar.LENGTH_LONG);
+                snackbar.setAction("Login", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        finish();
+                    }
+                });
+                snackbar.show();
+//                finish();
             } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
+                if (success.equals("could not register")) {
+                    mPasswordView.setError(getString(R.string.error_backend));
+                    mPasswordView.requestFocus();
+                }
+                else if (success.equals("")) {
+                    Snackbar snackbar = Snackbar.make(mProgressView.getRootView(), "You are not connected to the Internet", Snackbar.LENGTH_LONG);
+                    snackbar.setAction("WiFi Settings", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+                        }
+                    });
+                    snackbar.show();
+                }
+                else if (success.equals("username already used")){
+                    mUsernameView.setError(getString(R.string.error_username_taken));
+                    mUsernameView.requestFocus();
+                }
             }
         }
 
