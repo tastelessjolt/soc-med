@@ -15,9 +15,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.gson.JsonArray;
+
+import java.net.CookieStore;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -35,9 +38,13 @@ public class ProfileFragment extends CommonFragment {
     // TODO: Rename and change types of parameters
     private int itemNumber;
 
+
+
     private OnFragmentInteractionListener mListener;
 
     public static JsonArray myPosts;
+    Button logout;
+
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -91,6 +98,18 @@ public class ProfileFragment extends CommonFragment {
 
         TextView textView = rootView.findViewById(R.id.name);
         textView.setText(Storage.getName());
+
+        logout = (Button) rootView.findViewById(R.id.logout);
+        logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new MyCookieStore(getContext()).removeAll();
+                Intent intent = new Intent(getContext(), LoginActivity.class);
+                intent.putExtra(Constants.INTENT_DATA, Constants.GET_NETWORK_STATE);
+                startActivity(intent);
+                getActivity().finish();
+            }
+        });
 
         recyclerView = (RecyclerView) rootView.findViewById(R.id.profile_recycler);
         adapter = new PostAdapter(getContext(), ProfileFragment.myPosts, Constants.POSTS_TYPE.MY_POSTS);

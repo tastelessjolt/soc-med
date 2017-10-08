@@ -332,6 +332,124 @@ public class NetworkHandler extends Handler {
             }
 
         }
+        else if (msg.what == Constants.FOLLOW) {
+            Bundle bundle = (Bundle) msg.obj;
+            try {
+                URL url = new URL(Constants.URL + "Follow");
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+                try {
+                    connection.setRequestMethod("POST");
+                    connection.setDoOutput(true);
+                    connection.setDoInput(true);
+
+                    List<AbstractMap.SimpleEntry> list = new ArrayList<AbstractMap.SimpleEntry>();
+                    list.add(new AbstractMap.SimpleEntry("uid", ( (User) bundle.getSerializable(Constants.USER_DATA)).uid ));
+
+                    OutputStream os = connection.getOutputStream();
+                    BufferedWriter writer = new BufferedWriter(
+                            new OutputStreamWriter(os, "UTF-8"));
+                    writer.write(Utils.getQuery(list));
+                    writer.flush();
+                    writer.close();
+                    os.close();
+
+                    connection.getHeaderFields();
+
+                    if (!url.getHost().equals(connection.getURL().getHost())) {
+                        // we were redirected! Kick the user out to the browser to sign on?
+                        throw new Exception("Login to your internet provider");
+                    }
+
+
+                    JsonObject response = Utils.getAndParse(connection.getInputStream());
+                    Log.d(TAG, response.toString());
+
+                    if (response.get("status").getAsBoolean()) {
+                        sHandler.sendMessage(sHandler.obtainMessage(Constants.FOLLOW, Constants.TRUE, 0, bundle));
+                    } else {
+                        if (response.get("message").equals("could not follow")) {
+                            sHandler.sendMessage(sHandler.obtainMessage(Constants.FOLLOW, Constants.FALSE, 0, bundle));
+                        }
+                        else if (response.get("message").getAsString().equals("Already followed")) {
+                            sHandler.sendMessage(sHandler.obtainMessage(Constants.FOLLOW, Constants.ALREADY_FOLLOWED, 0, bundle));
+                        }
+                    }
+
+                } catch (Exception e) {
+                    Log.d(TAG, e.toString());
+                    sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
+                } finally {
+                    connection.disconnect();
+                }
+
+            } catch (MalformedURLException e) {
+                Log.d(TAG, e.toString());
+                sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
+            } catch (IOException e) {
+                Log.d(TAG, e.toString());
+                sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
+            }
+        }
+        else if (msg.what == Constants.UNFOLLOW) {
+            Bundle bundle = (Bundle) msg.obj;
+            try {
+                URL url = new URL(Constants.URL + "Unfollow");
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+                try {
+                    connection.setRequestMethod("POST");
+                    connection.setDoOutput(true);
+                    connection.setDoInput(true);
+
+                    List<AbstractMap.SimpleEntry> list = new ArrayList<AbstractMap.SimpleEntry>();
+                    list.add(new AbstractMap.SimpleEntry("uid", ( (User) bundle.getSerializable(Constants.USER_DATA)).uid ));
+
+                    OutputStream os = connection.getOutputStream();
+                    BufferedWriter writer = new BufferedWriter(
+                            new OutputStreamWriter(os, "UTF-8"));
+                    writer.write(Utils.getQuery(list));
+                    writer.flush();
+                    writer.close();
+                    os.close();
+
+                    connection.getHeaderFields();
+
+                    if (!url.getHost().equals(connection.getURL().getHost())) {
+                        // we were redirected! Kick the user out to the browser to sign on?
+                        throw new Exception("Login to your internet provider");
+                    }
+
+
+                    JsonObject response = Utils.getAndParse(connection.getInputStream());
+                    Log.d(TAG, response.toString());
+
+                    if (response.get("status").getAsBoolean()) {
+                        sHandler.sendMessage(sHandler.obtainMessage(Constants.UNFOLLOW, Constants.TRUE, 0, bundle));
+                    } else {
+                        if (response.get("message").equals("could not unfollow")) {
+                            sHandler.sendMessage(sHandler.obtainMessage(Constants.UNFOLLOW, Constants.FALSE, 0, bundle));
+                        }
+                        else if (response.get("message").getAsString().equals("user not followed")) {
+                            sHandler.sendMessage(sHandler.obtainMessage(Constants.UNFOLLOW, Constants.NOT_FOLLOWED, 0, bundle));
+                        }
+                    }
+
+                } catch (Exception e) {
+                    Log.d(TAG, e.toString());
+                    sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
+                } finally {
+                    connection.disconnect();
+                }
+
+            } catch (MalformedURLException e) {
+                Log.d(TAG, e.toString());
+                sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
+            } catch (IOException e) {
+                Log.d(TAG, e.toString());
+                sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
+            }
+        }
     }
 }
 

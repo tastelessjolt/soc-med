@@ -40,6 +40,7 @@
                     android:hint="@string/search_hint"
                     android:padding="@dimen/appbar_padding_top"
                     android:textSize="@dimen/name_size"
+                    android:inputType="textCapSentences"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -87,19 +88,57 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
 
-                    <Button
-                        android:id="@+id/button2"
+                    <RelativeLayout
+                        android:id="@+id/follow_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
                         android:layout_marginEnd="8dp"
                         android:layout_marginTop="8dp"
-                        android:textAllCaps="false"
-                        android:textSize="@dimen/name_size"
-                        android:text="Follow"
+                        android:background="@drawable/button"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:visibility="gone"
+                        >
+
+                        <TextView
+                            android:id="@+id/follow_button_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:padding="@dimen/appbar_padding_top"
+                            android:text="Follow"
+                            android:textSize="@dimen/name_size" />
+
+                        <ProgressBar
+                            android:id="@+id/follow_progress"
+                            style="?android:attr/progressBarStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerHorizontal="true"
+                            android:layout_centerVertical="true"
+                            android:visibility="gone" />
+
+                        <ImageView
+                            android:id="@+id/done"
+                            android:layout_centerHorizontal="true"
+                            android:layout_centerVertical="true"
+                            android:src="@drawable/ic_done_black_48px"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"/>
+
+                        <ImageView
+                            android:id="@+id/error"
+                            android:layout_centerHorizontal="true"
+                            android:layout_centerVertical="true"
+                            android:src="@drawable/ic_close_black_48px"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"/>
+
+                    </RelativeLayout>
 
                 </android.support.constraint.ConstraintLayout>
             </android.support.constraint.ConstraintLayout>
@@ -109,15 +148,6 @@
     </android.support.design.widget.AppBarLayout>
 
     <include layout="@layout/content_scrolling" />
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/fab_margin"
-        app:layout_anchor="@id/app_bar"
-        app:layout_anchorGravity="bottom|end"
-        app:srcCompat="@drawable/ic_person_white_24px" />
 
 </android.support.design.widget.CoordinatorLayout>
 

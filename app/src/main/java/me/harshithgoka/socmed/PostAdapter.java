@@ -61,9 +61,11 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         public RecyclerView recyclerView;
         public CommentAdapter commentAdapter;
         public LinearLayout mLin;
+        public boolean more;
         public ViewHolder(LinearLayout v) {
             super(v);
             mLin = v;
+            more = true;
         }
     }
 
@@ -143,6 +145,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
             holder.recyclerView = holder.mLin.findViewById(R.id.comments_recycler);
             holder.commentAdapter = new CommentAdapter(object, comments);
+            holder.commentAdapter.setMore(holder.more);
             LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
             holder.recyclerView.setLayoutManager(linearLayoutManager);
             holder.recyclerView.setAdapter(holder.commentAdapter);
@@ -151,6 +154,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                 @Override
                 public void onClick(View view) {
                     holder.commentAdapter.setMore(false);
+                    holder.more = false;
                     view.setVisibility(View.GONE);
                 }
             });

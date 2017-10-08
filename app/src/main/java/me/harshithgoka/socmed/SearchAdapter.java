@@ -108,7 +108,7 @@ public class SearchAdapter extends BaseAdapter implements Filterable {
             protected FilterResults performFiltering(CharSequence charSequence) {
                 List<User> userList = new ArrayList<>();
 
-                if (charSequence.toString().trim().length() >= 3) {
+                if (charSequence != null && charSequence.toString().trim().length() >= 3) {
                     try {
                         URL url = new URL(Constants.URL + "SearchUser");
                         HttpURLConnection connection = (HttpURLConnection) url.openConnection();

@@ -37,6 +37,10 @@ public final class Constants {
     public static int WRITE_POST = 4;
     public static int WRITE_COMMENT = 5;
     public static int GET_USER_POSTS = 6;
+    public static int FOLLOW = 7;
+    public static int ALREADY_FOLLOWED = 8;
+    public static int UNFOLLOW = 9;
+    public static int NOT_FOLLOWED = 10;
 
     public static int TRUE = 93;
     public static int FALSE = 39;

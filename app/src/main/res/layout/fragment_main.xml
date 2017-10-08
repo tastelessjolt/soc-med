@@ -30,7 +30,6 @@
                     android:id="@+id/write_post"
                     android:layout_width="match_parent"
                     android:layout_height="156dp"
-                    android:layout_marginBottom="8dp"
                     android:layout_marginEnd="8dp"
                     android:layout_marginStart="8dp"
                     android:layout_marginTop="8dp"
@@ -38,10 +37,11 @@
                     android:hint="@string/post_hint"
                     android:maxLines="6"
                     android:minLines="4"
+                    android:backgroundTint="@android:color/transparent"
+                    android:inputType=
+                        "textCapSentences|textAutoCorrect"
                     android:textSize="@dimen/name_size"
-                    app:layout_constraintBottom_toBottomOf="@+id/post_button"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -51,8 +51,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
                     android:layout_marginEnd="8dp"
-                    android:background="@drawable/border"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:background="@drawable/button"
+                    app:layout_constraintBottom_toBottomOf="@+id/write_post"
                     app:layout_constraintEnd_toEndOf="parent">
 
                     <TextView
@@ -71,7 +71,7 @@
                         android:layout_height="wrap_content"
                         android:layout_centerHorizontal="true"
                         android:layout_centerVertical="true"
-                        android:visibility="gone"/>
+                        android:visibility="gone" />
 
                 </RelativeLayout>
 

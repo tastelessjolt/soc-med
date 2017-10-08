@@ -127,6 +127,9 @@ public class MainActivity extends AppCompatActivity {
                 else if (msg.what == Constants.GET_USER_POSTS) {
                     ((SearchFragment) mSectionsPagerAdapter.getItem(1)).SetPosts((Bundle) msg.obj);
                 }
+                else if (msg.what == Constants.FOLLOW || msg.what == Constants.UNFOLLOW) {
+                    ( (SearchFragment) mSectionsPagerAdapter.getItem(1)).FollowCallback(msg.what, msg.arg1 ,(Bundle) msg.obj);
+                }
             }
         };
 

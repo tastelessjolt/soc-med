@@ -47,6 +47,12 @@ public class NetworkService extends Service {
             else if (what == Constants.GET_USER_POSTS) {
                 tHandler.sendMessage(tHandler.obtainMessage(what, intent.getBundleExtra(Constants.INTENT_DATA)));
             }
+            else if (what == Constants.FOLLOW) {
+                tHandler.sendMessage(tHandler.obtainMessage(what, intent.getBundleExtra(Constants.INTENT_DATA)));
+            }
+            else if (what == Constants.UNFOLLOW) {
+                tHandler.sendMessage(tHandler.obtainMessage(what, intent.getBundleExtra(Constants.INTENT_DATA)));
+            }
         }
 
         return Service.START_STICKY;
@@ -117,6 +123,13 @@ public class NetworkService extends Service {
         else if (msg.what == Constants.GET_USER_POSTS) {
             Constants.currHandler.sendMessage(Constants.currHandler.obtainMessage(Constants.GET_USER_POSTS, msg.obj));
         }
+        else if (msg.what == Constants.FOLLOW) {
+            Constants.currHandler.sendMessage(Constants.currHandler.obtainMessage(Constants.FOLLOW, msg.arg1, 0, msg.obj));
+        }
+        else if (msg.what == Constants.UNFOLLOW) {
+            Constants.currHandler.sendMessage(Constants.currHandler.obtainMessage(Constants.UNFOLLOW, msg.arg1, 0, msg.obj));
+        }
+
         tHandler.dispatchMessage(tHandler.obtainMessage(Constants.ACK, "Cool!"));
     }
 

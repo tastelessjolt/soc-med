@@ -1,10 +1,13 @@
 package me.harshithgoka.socmed;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -14,7 +17,12 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -45,6 +53,7 @@ public class SearchFragment extends CommonFragment {
     private int sectionNo;
 
     private OnFragmentInteractionListener mListener;
+    RelativeLayout followButton;
 
     ProfileFragment profileFragment;
 
@@ -119,6 +128,99 @@ public class SearchFragment extends CommonFragment {
         mListener = null;
     }
 
+    class FollowOnClickListener implements View.OnClickListener {
+
+        User user;
+        FollowOnClickListener (User user) {
+            this.user = user;
+        }
+
+        @Override
+        public void onClick(View view) {
+            Intent intent = new Intent(getContext(), NetworkService.class);
+            if ( ( (TextView) view.findViewById(R.id.follow_button_text)).getText().toString().equals("Follow") )
+                intent.putExtra(Constants.WHAT, Constants.FOLLOW);
+            else
+                intent.putExtra(Constants.WHAT, Constants.UNFOLLOW);
+            Bundle bundle = new Bundle();
+            bundle.putSerializable(Constants.USER_DATA, user);
+
+            intent.putExtra(Constants.INTENT_DATA, bundle);
+            getContext().startService(intent);
+
+            view.findViewById(R.id.follow_button_text).setVisibility(View.INVISIBLE);
+            view.findViewById(R.id.follow_progress).setVisibility(View.VISIBLE);
+        }
+    }
+
+    class SnackbarCallback extends Snackbar.Callback {
+        int status, action;
+        RelativeLayout followButton;
+        SnackbarCallback(RelativeLayout followButton, int action, int status) {
+            this.followButton = followButton;
+            this.action = action;
+            this.status = status;
+        }
+
+        @Override
+        public void onDismissed(Snackbar transientBottomBar, int event) {
+            super.onDismissed(transientBottomBar, event);
+
+            ProgressBar progressBar = followButton.findViewById(R.id.follow_progress);
+            TextView textView = followButton.findViewById(R.id.follow_button_text);
+            ImageView doneImageView = followButton.findViewById(R.id.done);
+            ImageView errorImageView = followButton.findViewById(R.id.error);
+
+            textView.setVisibility(View.VISIBLE);
+
+            if ( (action == Constants.FOLLOW && status == Constants.FALSE) || (action == Constants.UNFOLLOW && status == Constants.TRUE) )
+                textView.setText("Follow");
+            else
+                textView.setText("UnFollow");
+
+            progressBar.setVisibility(View.GONE);
+            doneImageView.setVisibility(View.GONE);
+            errorImageView.setVisibility(View.GONE);
+
+        }
+    }
+
+    public void FollowCallback(int action, int status, Bundle bundle) {
+        User mUser = (User) bundle.getSerializable(Constants.USER_DATA);
+
+        if (adapter != null && mUser.uid.equals(adapter.user.uid)) {
+            ProgressBar progressBar = followButton.findViewById(R.id.follow_progress);
+            TextView textView = followButton.findViewById(R.id.follow_button_text);
+            ImageView doneImageView = followButton.findViewById(R.id.done);
+            ImageView errorImageView = followButton.findViewById(R.id.error);
+
+            textView.setVisibility(View.INVISIBLE);
+            progressBar.setVisibility(View.GONE);
+            doneImageView.setVisibility(View.GONE);
+            Snackbar snackbar;
+            if (status == Constants.TRUE) {
+                snackbar = Snackbar.make(getView().getRootView(), ((action == Constants.FOLLOW) ? "" : "Un") + "Follow Successful", Snackbar.LENGTH_SHORT);
+                doneImageView.setVisibility(View.VISIBLE);
+            }
+            else {
+                if (status == Constants.FALSE) {
+                    errorImageView.setVisibility(View.VISIBLE);
+                    snackbar = Snackbar.make(getView().getRootView(), "Couldn't " + ((action == Constants.FOLLOW) ? "" : "un")  + "follow this person", Snackbar.LENGTH_SHORT);
+                }
+                else {
+                    errorImageView.setVisibility(View.VISIBLE);
+                    if (action == Constants.FOLLOW)
+                        snackbar = Snackbar.make(getView().getRootView(), "Already following this person", Snackbar.LENGTH_SHORT);
+                    else
+                        snackbar = Snackbar.make(getView().getRootView(), "Not following this person", Snackbar.LENGTH_SHORT);
+                }
+            }
+            snackbar.addCallback(new SnackbarCallback(followButton, action, status));
+            snackbar.show();
+        }
+    }
+
+
     public void SetPosts(Bundle obj) {
         User user = (User) obj.getSerializable(Constants.USER_DATA);
         String postsStr = obj.getString(Constants.POSTS);
@@ -133,10 +235,20 @@ public class SearchFragment extends CommonFragment {
         JsonArray jsonElements = jsonParser.parse(postsStr).getAsJsonArray();
 
         ( (TextView) getView().getRootView().findViewById(R.id.name)).setText(user.name);
-        ( (TextView) getView().getRootView().findViewById(R.id.username)).setText("@(" + user.uid + ")");
+        ( (TextView) getView().getRootView().findViewById(R.id.username)).setText("(@" + user.uid + ")");
 
+        ( (AutoCompleteTextView) getView().getRootView().findViewById(R.id.search_bar)).setText("");
+        followButton = getView().getRootView().findViewById(R.id.follow_button);
+        followButton.setVisibility(View.VISIBLE);
+        ( (TextView) followButton.findViewById(R.id.follow_button_text)).setText("Follow");
+        followButton.setOnClickListener(new FollowOnClickListener(user));
+
+        InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        mgr.hideSoftInputFromWindow(( (AutoCompleteTextView) getView().getRootView().findViewById(R.id.search_bar)).getWindowToken(), 0);
 
         if (recyclerView == null) {
+
+
             recyclerView = getView().getRootView().findViewById(R.id.profile_recycler);
 
             swipeRefreshLayout = getView().getRootView().findViewById(R.id.profileswiperefresh);
@@ -160,6 +272,8 @@ public class SearchFragment extends CommonFragment {
             recyclerView.setItemAnimator(new DefaultItemAnimator());
             recyclerView.setHasFixedSize(true);
             recyclerView.setAdapter(adapter);
+
+
         }
         else {
             adapter.user = user;
