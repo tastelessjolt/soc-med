@@ -92,7 +92,7 @@ public class ProfileFragment extends CommonFragment {
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view.getRootView(), "Person Info", Snackbar.LENGTH_INDEFINITE).show();
+//                Snackbar.make(view.getRootView(), "Person Info", Snackbar.LENGTH_SHORT).show();
             }
         });
 

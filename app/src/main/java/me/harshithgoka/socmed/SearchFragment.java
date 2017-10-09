@@ -83,8 +83,6 @@ public class SearchFragment extends CommonFragment {
         if (getArguments() != null) {
             sectionNo = getArguments().getInt(ARG_SECTION_NUMBER);
         }
-
-
     }
 
     Handler handler;
@@ -99,6 +97,21 @@ public class SearchFragment extends CommonFragment {
         AutoCompleteTextView textView = rootView.findViewById(R.id.search_bar);
         SearchAdapter searchAdapter = new SearchAdapter(getContext());
         textView.setAdapter(searchAdapter);
+
+
+        followButton = rootView.findViewById(R.id.follow_button);
+        followButton.setVisibility(View.GONE);
+
+        swipeRefreshLayout = rootView.findViewById(R.id.profileswiperefresh);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                if (adapter != null) {
+                    swipeRefreshLayout.setRefreshing(false);
+                }
+            }
+        });
+
 
 
 
@@ -240,7 +253,10 @@ public class SearchFragment extends CommonFragment {
         ( (AutoCompleteTextView) getView().getRootView().findViewById(R.id.search_bar)).setText("");
         followButton = getView().getRootView().findViewById(R.id.follow_button);
         followButton.setVisibility(View.VISIBLE);
-        ( (TextView) followButton.findViewById(R.id.follow_button_text)).setText("Follow");
+        if (user.following)
+            ( (TextView) followButton.findViewById(R.id.follow_button_text)).setText("UnFollow");
+        else
+            ( (TextView) followButton.findViewById(R.id.follow_button_text)).setText("Follow");
         followButton.setOnClickListener(new FollowOnClickListener(user));
 
         InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);

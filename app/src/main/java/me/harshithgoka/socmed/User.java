@@ -10,4 +10,5 @@ public class User implements Serializable {
     String uid;
     String name;
     String email;
+    boolean following;
 }

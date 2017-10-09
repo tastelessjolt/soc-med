@@ -8,6 +8,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -36,6 +37,15 @@ public class CommonFragment extends Fragment {
         RecyclerView recyclerView1 = rootView.findViewById(R.id.comments_recycler);
         CommentAdapter commentAdapter = ( (CommentAdapter) recyclerView1.getAdapter());
         commentAdapter.AddComment(bundle);
+
+
+        Button button = rootView.findViewById(R.id.more);
+        if ( commentAdapter.comments.size() > 3 && commentAdapter.more) {
+            button.setVisibility(View.VISIBLE);
+        }
+        else {
+            button.setVisibility(View.GONE);
+        }
 
         ImageView imageView = (ImageView) rootView.findViewById(R.id.comment_img);
         ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.comment_progress);

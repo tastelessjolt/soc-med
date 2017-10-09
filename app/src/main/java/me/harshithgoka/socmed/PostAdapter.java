@@ -123,23 +123,18 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         return vh;
     }
 
-    public void WriteComment () {
-
-    }
-
-    @SuppressLint("ResourceType")
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         if (data == null) {
             ((TextView) holder.mLin.findViewById(R.id.post_name)).setText(dummy_dataset[position * 2]);
             ((TextView) holder.mLin.findViewById(R.id.post_text)).setText(dummy_dataset[position * 2 + 1]);
-            ((TextView) holder.mLin.findViewById(R.id.timestamp)).setText("3hrs ago");
+            ((TextView) holder.mLin.findViewById(R.id.timestamp)).setText("3h ago");
         }
         else {
             JsonObject object = (JsonObject) data.get(position);
             ((TextView) holder.mLin.findViewById(R.id.post_name)).setText(object.get("name").getAsString());
             JsonElement text;
-            ((TextView) holder.mLin.findViewById(R.id.post_text)).setText( ((text = object.get("text")) != null) ?  text.getAsString() : "");
+            ((TextView) holder.mLin.findViewById(R.id.post_text)).setText( ((text = object.get("text")) != null) ? text.getAsString() : "");
             ((TextView) holder.mLin.findViewById(R.id.timestamp)).setText(Utils.convertTimestamp(object.get("timestamp").getAsString()));
 
             JsonElement imageid;
