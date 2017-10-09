@@ -138,16 +138,18 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         else {
             JsonObject object = (JsonObject) data.get(position);
             ((TextView) holder.mLin.findViewById(R.id.post_name)).setText(object.get("name").getAsString());
-            ((TextView) holder.mLin.findViewById(R.id.post_text)).setText(object.get("text").getAsString());
+            JsonElement text;
+            ((TextView) holder.mLin.findViewById(R.id.post_text)).setText( ((text = object.get("text")) != null) ?  text.getAsString() : "");
             ((TextView) holder.mLin.findViewById(R.id.timestamp)).setText(Utils.convertTimestamp(object.get("timestamp").getAsString()));
 
             JsonElement imageid;
+            ImageView image = holder.mLin.findViewById(R.id.image);
             if((imageid = object.get("imageid")) != null) {
                 DiskCache.getImage(imageid.getAsString(), holder);
+//                image.setImageResource(0);
             }
             else {
-                ImageView imageView = holder.mLin.findViewById(R.id.image);
-                imageView.setImageResource(0);
+                image.setImageResource(0);
             }
 
             JsonArray comments = object.getAsJsonArray("Comment");

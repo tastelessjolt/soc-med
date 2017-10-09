@@ -111,6 +111,9 @@ public class DiskCache {
                     } catch (Exception e) {
                         Log.d(TAG, e.toString());
                     }
+                    finally {
+                        connection.disconnect();
+                    }
 
 
                 } catch (MalformedURLException e) {

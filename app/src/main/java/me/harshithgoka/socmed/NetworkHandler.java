@@ -193,30 +193,21 @@ public class NetworkHandler extends Handler {
                     connection.setDoOutput(true);
                     connection.setDoInput(true);
 
-//                    connection.setRequestProperty("Content-Type", "application/json");
-
-
 
                     List<AbstractMap.SimpleEntry> list = new ArrayList<AbstractMap.SimpleEntry>();
                     list.add(new AbstractMap.SimpleEntry<String, String>("content", bundle.getString(Constants.POST_TEXT)));
-
-//                    JsonObject jsonObject = new JsonObject();
-//                    jsonObject.addProperty("text", bundle.getString(Constants.POST_TEXT));
                     String base64 = "";
                     if (bitmap != null) {
                         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 60, stream);
                         byte[] byteArray = stream.toByteArray();
                         base64 = Base64.encodeToString(byteArray, Base64.DEFAULT);
                         list.add(new AbstractMap.SimpleEntry<String, String>("image", base64));
-//                        Log.d (TAG, base64);
-//                        jsonObject.addProperty("image", base64);
                     }
                     OutputStream os = connection.getOutputStream();
                     BufferedWriter writer = new BufferedWriter(
                             new OutputStreamWriter(os, "ASCII"));
                     String out = Utils.getQuery(list);
-                    Log.d(TAG, out + base64);
                     writer.write(out);
                     writer.flush();
                     writer.close();
