@@ -39,7 +39,7 @@ public class NetworkService extends Service {
                 tHandler.sendMessage(tHandler.obtainMessage(Constants.GET_MY_POSTS));
             }
             else if (what == Constants.WRITE_POST) {
-                tHandler.sendMessage(tHandler.obtainMessage(what, intent.getStringExtra(Constants.INTENT_DATA)));
+                tHandler.sendMessage(tHandler.obtainMessage(what, intent.getBundleExtra(Constants.INTENT_DATA)));
             }
             else if (what == Constants.WRITE_COMMENT) {
                 tHandler.sendMessage(tHandler.obtainMessage(what, intent.getBundleExtra(Constants.INTENT_DATA)));

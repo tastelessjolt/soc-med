@@ -29,6 +29,8 @@ public final class Constants {
     public static String POST_POS = "PostPos";
     public static String USER_DATA = "UserData";
     public static String POSTS = "Posts";
+    public static String POST_TEXT = "PostText";
+    public static String POST_IMG = "PostImg";
 
     public static int ACK = 0;
     public static int GET_NETWORK_STATE = 1;

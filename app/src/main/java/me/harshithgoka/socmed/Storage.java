@@ -9,7 +9,12 @@ import android.content.SharedPreferences;
 
 public class Storage {
     private static String name;
+
     private static Context context;
+
+    public static Context getContext() {
+        return context;
+    }
 
     public static void Init(Context context) {
         if (context != null) {

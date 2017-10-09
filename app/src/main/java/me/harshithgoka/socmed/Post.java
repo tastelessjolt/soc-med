@@ -13,4 +13,5 @@ public class Post {
     int postid;
     String text;
     String timestamp;
+    String imageid;
 }

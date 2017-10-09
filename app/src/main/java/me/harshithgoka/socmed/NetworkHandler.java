@@ -1,17 +1,23 @@
 package me.harshithgoka.socmed;
 
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -168,6 +174,17 @@ public class NetworkHandler extends Handler {
         }
 
         else if (msg.what == Constants.WRITE_POST) {
+            Bundle bundle = (Bundle) msg.obj;
+            Bitmap bitmap = null;
+            if ( !bundle.getString( Constants.POST_IMG,"").equals("") ) {
+                Uri imgUri = Uri.parse(bundle.getString(Constants.POST_IMG));
+                try {
+                    bitmap = MediaStore.Images.Media.getBitmap(Storage.getContext().getContentResolver(),imgUri);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
             try {
                 URL url = new URL(Constants.URL + "CreatePost");
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -176,13 +193,31 @@ public class NetworkHandler extends Handler {
                     connection.setDoOutput(true);
                     connection.setDoInput(true);
 
-                    List<AbstractMap.SimpleEntry> list = new ArrayList<AbstractMap.SimpleEntry>();
-                    list.add(new AbstractMap.SimpleEntry("content", (String) msg.obj));
+//                    connection.setRequestProperty("Content-Type", "application/json");
 
+
+
+                    List<AbstractMap.SimpleEntry> list = new ArrayList<AbstractMap.SimpleEntry>();
+                    list.add(new AbstractMap.SimpleEntry<String, String>("content", bundle.getString(Constants.POST_TEXT)));
+
+//                    JsonObject jsonObject = new JsonObject();
+//                    jsonObject.addProperty("text", bundle.getString(Constants.POST_TEXT));
+                    String base64 = "";
+                    if (bitmap != null) {
+                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                        byte[] byteArray = stream.toByteArray();
+                        base64 = Base64.encodeToString(byteArray, Base64.DEFAULT);
+                        list.add(new AbstractMap.SimpleEntry<String, String>("image", base64));
+//                        Log.d (TAG, base64);
+//                        jsonObject.addProperty("image", base64);
+                    }
                     OutputStream os = connection.getOutputStream();
                     BufferedWriter writer = new BufferedWriter(
-                            new OutputStreamWriter(os, "UTF-8"));
-                    writer.write(Utils.getQuery(list));
+                            new OutputStreamWriter(os, "ASCII"));
+                    String out = Utils.getQuery(list);
+                    Log.d(TAG, out + base64);
+                    writer.write(out);
                     writer.flush();
                     writer.close();
                     os.close();

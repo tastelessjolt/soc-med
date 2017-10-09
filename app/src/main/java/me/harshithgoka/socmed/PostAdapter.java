@@ -3,8 +3,8 @@ package me.harshithgoka.socmed;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.IdRes;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -20,16 +20,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
-import org.w3c.dom.Text;
-
-import java.sql.BatchUpdateException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.zip.Inflater;
 
 /**
  * Created by harshithgoka on 05/10/17.
@@ -62,10 +54,20 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         public CommentAdapter commentAdapter;
         public LinearLayout mLin;
         public boolean more;
+        public Uri imageUri;
         public ViewHolder(LinearLayout v) {
             super(v);
             mLin = v;
             more = true;
+            imageUri = null;
+        }
+
+        public void setImageUri(Uri imageUri) {
+            this.imageUri = imageUri;
+            ImageView imageView;
+            if (mLin != null && (imageView = mLin.findViewById(R.id.image)) != null ) {
+                imageView.setImageURI(imageUri);
+            }
         }
     }
 
@@ -138,6 +140,15 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             ((TextView) holder.mLin.findViewById(R.id.post_name)).setText(object.get("name").getAsString());
             ((TextView) holder.mLin.findViewById(R.id.post_text)).setText(object.get("text").getAsString());
             ((TextView) holder.mLin.findViewById(R.id.timestamp)).setText(Utils.convertTimestamp(object.get("timestamp").getAsString()));
+
+            JsonElement imageid;
+            if((imageid = object.get("imageid")) != null) {
+                DiskCache.getImage(imageid.getAsString(), holder);
+            }
+            else {
+                ImageView imageView = holder.mLin.findViewById(R.id.image);
+                imageView.setImageResource(0);
+            }
 
             JsonArray comments = object.getAsJsonArray("Comment");
 
