@@ -24,6 +24,8 @@
             <TextView
                 android:translationZ="10dp"
                 android:id="@+id/post_name"
+                android:padding="4dp"
+                android:background="@color/readability"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
@@ -38,6 +40,8 @@
             <TextView
                 android:translationZ="10dp"
                 android:id="@+id/timestamp"
+                android:padding="4dp"
+                android:background="@color/readability"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
@@ -143,7 +147,7 @@
 
             <ImageView
                 android:id="@+id/image"
-                android:minHeight="80dp"
+                android:minHeight="60dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:scaleType="fitXY"

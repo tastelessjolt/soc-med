@@ -72,6 +72,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     }
 
     public void addToDataset(JsonArray dataset, int offset) {
+        Log.d(TAG, type.toString());
         if (data != null) {
             JsonArray firstPart = new JsonArray();
             for (int i = 0; i != offset; i ++)

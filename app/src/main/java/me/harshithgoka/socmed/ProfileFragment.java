@@ -111,7 +111,8 @@ public class ProfileFragment extends CommonFragment {
         });
 
         recyclerView = (RecyclerView) rootView.findViewById(R.id.profile_recycler);
-        adapter = new PostAdapter(getContext(), ProfileFragment.myPosts, Constants.POSTS_TYPE.MY_POSTS);
+        if (adapter == null)
+            adapter = new PostAdapter(getContext(), ProfileFragment.myPosts, Constants.POSTS_TYPE.MY_POSTS);
 
         recyclerView.setAdapter(adapter);
         linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);

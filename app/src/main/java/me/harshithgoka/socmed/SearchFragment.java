@@ -86,6 +86,7 @@ public class SearchFragment extends CommonFragment {
         }
     }
 
+
     Handler handler;
 
     @Override
@@ -242,6 +243,8 @@ public class SearchFragment extends CommonFragment {
         JsonParser jsonParser = new JsonParser();
         JsonArray jsonElements = jsonParser.parse(postsStr).getAsJsonArray();
 
+        swipeRefreshLayout = getView().getRootView().findViewById(R.id.profileswiperefresh);
+        swipeRefreshLayout.setRefreshing(false);
         if (adapter != null && adapter.user != null && adapter.user.uid.equals(user.uid)) {
             adapter.addToDataset(jsonElements, obj.getInt(Constants.OFFSET));
         }
@@ -253,10 +256,12 @@ public class SearchFragment extends CommonFragment {
             ((AutoCompleteTextView) getView().getRootView().findViewById(R.id.search_bar)).setText("");
             followButton = getView().getRootView().findViewById(R.id.follow_button);
             followButton.setVisibility(View.VISIBLE);
-            if (user.following)
+            if (user.following) {
                 ((TextView) followButton.findViewById(R.id.follow_button_text)).setText("UnFollow");
-            else
+            }
+            else {
                 ((TextView) followButton.findViewById(R.id.follow_button_text)).setText("Follow");
+            }
             followButton.setOnClickListener(new FollowOnClickListener(user));
 
             InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -265,7 +270,6 @@ public class SearchFragment extends CommonFragment {
             if (recyclerView == null) {
                 recyclerView = getView().getRootView().findViewById(R.id.profile_recycler);
 
-                swipeRefreshLayout = getView().getRootView().findViewById(R.id.profileswiperefresh);
                 swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
@@ -285,12 +289,7 @@ public class SearchFragment extends CommonFragment {
                 recyclerView.setItemAnimator(new DefaultItemAnimator());
                 recyclerView.setHasFixedSize(true);
                 recyclerView.setAdapter(adapter);
-                recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
-                    @Override
-                    public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-                        adapter.loadMore(totalItemsCount);
-                    }
-                });
+
 
 
             } else {
@@ -298,6 +297,12 @@ public class SearchFragment extends CommonFragment {
                 adapter.setData(jsonElements);
                 adapter.notifyDataSetChanged();
                 swipeRefreshLayout.setRefreshing(false);
+                recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
+                    @Override
+                    public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                        adapter.loadMore(totalItemsCount);
+                    }
+                });
             }
         }
     }

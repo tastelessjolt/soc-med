@@ -214,7 +214,8 @@ public class MainFragment extends CommonFragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         recyclerView = (RecyclerView) rootView.findViewById(R.id.recycler);
-        adapter = new PostAdapter(getContext(), MainFragment.feed, FEED);
+        if (adapter == null)
+            adapter = new PostAdapter(getContext(), MainFragment.feed, FEED);
         addImageButton = rootView.findViewById(R.id.add_image);
         destImage = rootView.findViewById(R.id.image_view);
 
@@ -224,20 +225,16 @@ public class MainFragment extends CommonFragment {
                 Intent pickPhoto = new Intent(Intent.ACTION_PICK,
                         android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 
-                Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                takePicture.putExtra(MediaStore.EXTRA_OUTPUT, getCaptureImageOutputUri());
-                takePicture.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-                Intent chooserIntent = Intent.createChooser(takePicture, "Choose between Camera and Gallery");
-                chooserIntent.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] { pickPhoto });
+//                Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//                takePicture.putExtra(MediaStore.EXTRA_OUTPUT, getCaptureImageOutputUri());
+//                takePicture.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+//
+//                Intent chooserIntent = Intent.createChooser(takePicture, "Choose between Camera and Gallery");
+//                chooserIntent.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+//                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] { pickPhoto });
 
 
                 startActivityForResult(pickPhoto, 0);
-
-//                startActivityForResult(takePicture, 0);
-
-//                startActivityForResult(pickPhoto , 1);//one can be replaced with any action code
             }
         });
 
@@ -274,7 +271,7 @@ public class MainFragment extends CommonFragment {
         });
 
 //        adapter.refreshDataset();
-        Log.d(TAG, getArguments().getInt(ARG_SECTION_NUMBER, -1) + "");
+        Log.d(TAG, "Which Tab? " + getArguments().getInt(ARG_SECTION_NUMBER, -1) + "");
 //            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
         return rootView;
     }
