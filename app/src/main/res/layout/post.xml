@@ -145,12 +145,13 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <ImageView
+            <me.harshithgoka.socmed.MyImageView
                 android:id="@+id/image"
                 android:minHeight="60dp"
+                android:adjustViewBounds="true"
+                android:scaleType="centerCrop"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:scaleType="fitXY"
                 card_view:layout_constraintEnd_toEndOf="parent"
                 card_view:layout_constraintHorizontal_bias="0.0"
                 card_view:layout_constraintStart_toStartOf="parent"

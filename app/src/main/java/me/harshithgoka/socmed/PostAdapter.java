@@ -3,6 +3,8 @@ package me.harshithgoka.socmed;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
@@ -23,6 +25,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import java.io.File;
+
 /**
  * Created by harshithgoka on 05/10/17.
  */
@@ -35,8 +39,24 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
 
 
-    public void setData(JsonArray data) {
-        this.data = data;
+    public void setData(JsonArray dataset) {
+        if (data == null) {
+            data = new JsonArray();
+        }
+        else {
+            int len = data.size();
+            for (int i = 0; i != len; i++) {
+                data.remove(0);
+            }
+        }
+        if (type == Constants.POSTS_TYPE.FEED) {
+            for (int i = 0; i != dataset.size(); i++)
+                data.add(dataset.get(i));
+        }
+        else {
+            for (int i = dataset.size() - 1; i > -1; i--)
+                data.add(dataset.get(i));
+        }
     }
 
     public JsonArray data = null;
@@ -62,11 +82,54 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             imageUri = null;
         }
 
+        public int calculateInSampleSize(
+                BitmapFactory.Options options, int reqWidth, int reqHeight) {
+            // Raw height and width of image
+            final int height = options.outHeight;
+            final int width = options.outWidth;
+            int inSampleSize = 1;
+
+            if (height > reqHeight/2 || width > reqWidth/2) {
+
+                final int halfHeight = height / 2;
+                final int halfWidth = width / 2;
+
+                // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+                // height and width larger than the requested height and width.
+                while ((halfWidth / inSampleSize) >= reqWidth / 2) {
+                    inSampleSize *= 2;
+                }
+            }
+
+            Log.d(TAG, "inSampleSize - " + inSampleSize + " " + width + " " + height + " " + reqWidth + " " + reqHeight);
+
+            return inSampleSize;
+        }
+
+        public Bitmap decodeSampledBitmapFile(File file, int reqWidth, int reqHeight) {
+
+            // First decode with inJustDecodeBounds=true to check dimensions
+            final BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(file.getAbsolutePath(), options);
+//        BitmapFactory.decodeResource(res, resId, options);
+
+            // Calculate inSampleSize
+            options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+            // Decode bitmap with inSampleSize set
+            options.inJustDecodeBounds = false;
+            return BitmapFactory.decodeFile(file.getAbsolutePath(), options);
+        }
+
+
         public void setImageUri(Uri imageUri) {
             this.imageUri = imageUri;
             ImageView imageView;
             if (mLin != null && (imageView = mLin.findViewById(R.id.image)) != null ) {
-                imageView.setImageURI(imageUri);
+
+                Log.d(TAG,  "MaxWidth = "  + imageView.getMaxWidth() + " or " + imageView.getRootView().getMeasuredWidth());
+                imageView.setImageBitmap(decodeSampledBitmapFile(new File(imageUri.getPath()), imageView.getRootView().getMeasuredWidth(), 0));
             }
         }
     }
@@ -78,12 +141,22 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             for (int i = 0; i != offset; i ++)
                 firstPart.add(data.remove(0));
 
-            for (int i = 0; i != dataset.size(); i++)
+
+            for (int i = 0; i != dataset.size(); i++) {
                 if (data.size() > 0)
                     data.remove(0);
+                else
+                    break;
+            }
 
-            for (int i = 0; i != dataset.size(); i++)
-                firstPart.add(dataset.get(i));
+            if (type == Constants.POSTS_TYPE.FEED) {
+                for (int i = 0; i != dataset.size(); i++)
+                    firstPart.add(dataset.get(i));
+            }
+            else {
+                for (int i = dataset.size() - 1; i > -1; i--)
+                    firstPart.add(dataset.get(i));
+            }
 
             for (int i = 0; i != data.size(); i++)
                 firstPart.add(data.get(i));
@@ -91,7 +164,15 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             data = firstPart;
         }
         else {
-            data = dataset;
+            data = new JsonArray();
+            if (type == Constants.POSTS_TYPE.FEED) {
+                for (int i = 0; i != dataset.size(); i++)
+                    data.add(dataset.get(i));
+            }
+            else {
+                for (int i = dataset.size() - 1; i > -1; i--)
+                    data.add(dataset.get(i));
+            }
         }
         notifyDataSetChanged();
     }
@@ -104,14 +185,35 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     public PostAdapter(Context context, JsonArray jsonElements, Constants.POSTS_TYPE userPosts, User user) {
         this.type = userPosts;
         this.context = context;
-        data = jsonElements;
+        if (jsonElements != null) {
+            data = new JsonArray();
+            if (type == Constants.POSTS_TYPE.FEED) {
+                for (int i = 0; i != jsonElements.size(); i++)
+                    data.add(jsonElements.get(i));
+            }
+            else {
+                for (int i = jsonElements.size() - 1; i > -1; i--)
+                    data.add(jsonElements.get(i));
+            }
+        }
         this.user = user;
     }
 
     PostAdapter(Context context, JsonArray argdata, Constants.POSTS_TYPE type) {
         this.type = type;
         this.context = context;
-        data = argdata;
+        if (argdata != null) {
+            data = new JsonArray();
+            if (type == Constants.POSTS_TYPE.FEED) {
+                for (int i = 0; i != argdata.size(); i++)
+                    data.add(argdata.get(i));
+            }
+            else {
+                for (int i = argdata.size() - 1; i > -1; i--)
+                    data.add(argdata.get(i));
+            }
+        }
+
         dummy_dataset = new String[]{"Zhang", "Hey! What's up? Ya dawg.",
                 "Dude", "I'm good dawg.",
                 "Zhang", "Noice! This is just me wanting to write a big passage to fill up the space, I know I could use lorem ipsum but I don't understand Latin or whatever language that is in. So bear with me. :P"};
@@ -186,8 +288,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             JsonElement imageid;
             ImageView image = holder.mLin.findViewById(R.id.image);
             if((imageid = object.get("imageid")) != null) {
-                DiskCache.getImage(imageid.getAsString(), holder);
 //                image.setImageResource(0);
+                DiskCache.getImage(imageid.getAsString(), holder);
             }
             else {
                 image.setImageResource(0);

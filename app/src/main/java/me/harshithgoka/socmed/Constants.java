@@ -14,7 +14,7 @@ import java.lang.reflect.Type;
 public final class Constants {
     public static String URL = "http://10.4.65.62:8080/twitter-backend/";
 
-    public static int MAX_LIMIT = 5;
+    public static int MAX_LIMIT = 10;
 
     public static String Name = "";
     public static String MISCSTATE = "MiscState";

@@ -1,6 +1,7 @@
 package me.harshithgoka.socmed;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -29,12 +30,12 @@ import static me.harshithgoka.socmed.Storage.getContext;
  */
 
 public class DiskCache {
-
     static int getImage(String fileid, PostAdapter.ViewHolder holder) {
         File cacheDir = Storage.getContext().getCacheDir();
         File file = new File(cacheDir, "img" + fileid + ".png");
         if (file.exists()) {
             if (holder != null)
+
                 holder.setImageUri(Uri.fromFile(file));
             return 0;
         }

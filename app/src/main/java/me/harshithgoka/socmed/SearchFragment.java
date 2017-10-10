@@ -243,6 +243,10 @@ public class SearchFragment extends CommonFragment {
         JsonParser jsonParser = new JsonParser();
         JsonArray jsonElements = jsonParser.parse(postsStr).getAsJsonArray();
 
+        if (getView() == null) {
+            return;
+        }
+        recyclerView = getView().getRootView().findViewById(R.id.profile_recycler);
         swipeRefreshLayout = getView().getRootView().findViewById(R.id.profileswiperefresh);
         swipeRefreshLayout.setRefreshing(false);
         if (adapter != null && adapter.user != null && adapter.user.uid.equals(user.uid)) {
@@ -267,15 +271,13 @@ public class SearchFragment extends CommonFragment {
             InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             mgr.hideSoftInputFromWindow(((AutoCompleteTextView) getView().getRootView().findViewById(R.id.search_bar)).getWindowToken(), 0);
 
-            if (recyclerView == null) {
-                recyclerView = getView().getRootView().findViewById(R.id.profile_recycler);
+            if (adapter == null) {
 
                 swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
                         if (adapter != null) {
                             adapter.refreshDataset();
-
                         }
                     }
                 });
@@ -290,6 +292,14 @@ public class SearchFragment extends CommonFragment {
                 recyclerView.setHasFixedSize(true);
                 recyclerView.setAdapter(adapter);
 
+                if (linearLayoutManager != null) {
+                    recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
+                        @Override
+                        public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                            adapter.loadMore(totalItemsCount);
+                        }
+                    });
+                }
 
 
             } else {
@@ -297,12 +307,6 @@ public class SearchFragment extends CommonFragment {
                 adapter.setData(jsonElements);
                 adapter.notifyDataSetChanged();
                 swipeRefreshLayout.setRefreshing(false);
-                recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
-                    @Override
-                    public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-                        adapter.loadMore(totalItemsCount);
-                    }
-                });
             }
         }
     }
