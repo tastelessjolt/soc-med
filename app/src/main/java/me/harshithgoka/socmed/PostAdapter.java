@@ -21,11 +21,18 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.File;
+import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * Created by harshithgoka on 05/10/17.
@@ -40,22 +47,9 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
 
     public void setData(JsonArray dataset) {
-        if (data == null) {
-            data = new JsonArray();
-        }
-        else {
-            int len = data.size();
-            for (int i = 0; i != len; i++) {
-                data.remove(0);
-            }
-        }
-        if (type == Constants.POSTS_TYPE.FEED) {
-            for (int i = 0; i != dataset.size(); i++)
-                data.add(dataset.get(i));
-        }
-        else {
-            for (int i = dataset.size() - 1; i > -1; i--)
-                data.add(dataset.get(i));
+        if (dataset != null) {
+            data = null;
+            addToDataset(dataset, 0);
         }
     }
 
@@ -128,14 +122,43 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             ImageView imageView;
             if (mLin != null && (imageView = mLin.findViewById(R.id.image)) != null ) {
 
-                Log.d(TAG,  "MaxWidth = "  + imageView.getMaxWidth() + " or " + imageView.getRootView().getMeasuredWidth());
-                imageView.setImageBitmap(decodeSampledBitmapFile(new File(imageUri.getPath()), imageView.getRootView().getMeasuredWidth(), 0));
+                imageView.setImageURI(imageUri);
+//                Log.d(TAG,  "MaxWidth = "  + imageView.getMaxWidth() + " or " + imageView.getRootView().getMeasuredWidth());
+//                imageView.setImageBitmap(decodeSampledBitmapFile(new File(imageUri.getPath()), imageView.getRootView().getMeasuredWidth(), 0));
             }
         }
     }
 
     public void addToDataset(JsonArray dataset, int offset) {
-        Log.d(TAG, type.toString());
+
+        if (dataset == null){
+            return;
+        }
+
+        Gson gson = new Gson();
+        Type listType = new TypeToken<List<Post>>() {}.getType();
+
+        List<Post> posts = gson.fromJson(dataset, listType);
+        if (type == Constants.POSTS_TYPE.FEED) {
+            Collections.sort(posts, new Comparator<Post>() {
+                @Override
+                public int compare(Post post, Post t1) {
+                    return post.timestamp.compareTo(t1.timestamp);
+                }
+            });
+        }
+        else {
+            Collections.sort(posts, new Comparator<Post>() {
+                @Override
+                public int compare(Post post, Post t1) {
+                    return -post.timestamp.compareTo(t1.timestamp);
+                }
+            });
+        }
+        JsonParser jsonParser = new JsonParser();
+        dataset = jsonParser.parse(gson.toJson(posts)).getAsJsonArray();
+
+//        Log.d(TAG, type.toString());
         if (data != null) {
             JsonArray firstPart = new JsonArray();
             for (int i = 0; i != offset; i ++)
@@ -149,14 +172,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                     break;
             }
 
-            if (type == Constants.POSTS_TYPE.FEED) {
-                for (int i = 0; i != dataset.size(); i++)
-                    firstPart.add(dataset.get(i));
-            }
-            else {
-                for (int i = dataset.size() - 1; i > -1; i--)
-                    firstPart.add(dataset.get(i));
-            }
+            for (int i = 0; i != dataset.size(); i++)
+                firstPart.add(dataset.get(i));
 
             for (int i = 0; i != data.size(); i++)
                 firstPart.add(data.get(i));
@@ -165,14 +182,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         }
         else {
             data = new JsonArray();
-            if (type == Constants.POSTS_TYPE.FEED) {
-                for (int i = 0; i != dataset.size(); i++)
-                    data.add(dataset.get(i));
-            }
-            else {
-                for (int i = dataset.size() - 1; i > -1; i--)
-                    data.add(dataset.get(i));
-            }
+            for (int i = 0; i != dataset.size(); i++)
+                data.add(dataset.get(i));
         }
         notifyDataSetChanged();
     }
@@ -185,34 +196,14 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     public PostAdapter(Context context, JsonArray jsonElements, Constants.POSTS_TYPE userPosts, User user) {
         this.type = userPosts;
         this.context = context;
-        if (jsonElements != null) {
-            data = new JsonArray();
-            if (type == Constants.POSTS_TYPE.FEED) {
-                for (int i = 0; i != jsonElements.size(); i++)
-                    data.add(jsonElements.get(i));
-            }
-            else {
-                for (int i = jsonElements.size() - 1; i > -1; i--)
-                    data.add(jsonElements.get(i));
-            }
-        }
+        setData(jsonElements);
         this.user = user;
     }
 
     PostAdapter(Context context, JsonArray argdata, Constants.POSTS_TYPE type) {
         this.type = type;
         this.context = context;
-        if (argdata != null) {
-            data = new JsonArray();
-            if (type == Constants.POSTS_TYPE.FEED) {
-                for (int i = 0; i != argdata.size(); i++)
-                    data.add(argdata.get(i));
-            }
-            else {
-                for (int i = argdata.size() - 1; i > -1; i--)
-                    data.add(argdata.get(i));
-            }
-        }
+        setData(argdata);
 
         dummy_dataset = new String[]{"Zhang", "Hey! What's up? Ya dawg.",
                 "Dude", "I'm good dawg.",
@@ -322,7 +313,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
             commentButton.setOnClickListener(new CommentClickListener(position, object.get("postid").getAsInt(), imageView, progressBar, editText));
 
-            Log.d(TAG, "Comments size: " + comments.size() + " More: " + holder.commentAdapter.more);
+//            Log.d(TAG, "Comments size: " + comments.size() + " More: " + holder.commentAdapter.more);
 
             if (comments.size() > 3 && holder.commentAdapter.more) {
                 button.setVisibility(View.VISIBLE);

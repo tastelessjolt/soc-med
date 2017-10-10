@@ -67,16 +67,16 @@ public class MainFragment extends CommonFragment {
 
     public void setData(Bundle bundle) {
         int offset = bundle.getInt(Constants.OFFSET);
-        Gson gson = new Gson();
-        Type listType = new TypeToken<List<Post>>() {}.getType();
-
-        List<Post> posts = gson.fromJson(bundle.getString(Constants.POSTS), listType);
-        Collections.sort(posts, new Comparator<Post>() {
-            @Override
-            public int compare(Post post, Post t1) {
-                return post.timestamp.compareTo(t1.timestamp);
-            }
-        });
+//        Gson gson = new Gson();
+//        Type listType = new TypeToken<List<Post>>() {}.getType();
+//
+//        List<Post> posts = gson.fromJson(bundle.getString(Constants.POSTS), listType);
+//        Collections.sort(posts, new Comparator<Post>() {
+//            @Override
+//            public int compare(Post post, Post t1) {
+//                return post.timestamp.compareTo(t1.timestamp);
+//            }
+//        });
 
 //            for (Post post:
 //                 posts) {
@@ -84,7 +84,7 @@ public class MainFragment extends CommonFragment {
 //            }
 
         JsonParser jsonParser = new JsonParser();
-        feed = jsonParser.parse(gson.toJson(posts)).getAsJsonArray();
+        feed = jsonParser.parse(bundle.getString(Constants.POSTS)).getAsJsonArray();
         if (adapter != null) {
             adapter.addToDataset(feed, offset);
         }
