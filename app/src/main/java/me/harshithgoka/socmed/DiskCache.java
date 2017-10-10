@@ -62,6 +62,7 @@ public class DiskCache {
             boolean b = false;
 
             if (strings[0] != null) {
+                Log.d(TAG, "FileID: " + strings[0]);
 
                 try {
                     URL url = new URL(Constants.URL + "Image");
@@ -119,6 +120,7 @@ public class DiskCache {
                 } catch (MalformedURLException e) {
                     Log.d(TAG, e.toString());
                 } catch (IOException e) {
+
                     Log.d(TAG, e.toString());
                 }
 

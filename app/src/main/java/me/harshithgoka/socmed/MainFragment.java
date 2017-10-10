@@ -2,13 +2,10 @@ package me.harshithgoka.socmed;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.design.widget.TextInputEditText;
-import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,7 +15,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -31,7 +27,6 @@ import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Comparator;
@@ -40,6 +35,7 @@ import java.util.Objects;
 
 import static android.app.Activity.RESULT_OK;
 import static android.support.v4.content.FileProvider.getUriForFile;
+import static me.harshithgoka.socmed.Constants.POSTS_TYPE.FEED;
 
 
 /**
@@ -69,33 +65,28 @@ public class MainFragment extends CommonFragment {
         return feed;
     }
 
-    public void setData(JsonArray feed) {
-        if (feed != null) {
+    public void setData(Bundle bundle) {
+        int offset = bundle.getInt(Constants.OFFSET);
+        Gson gson = new Gson();
+        Type listType = new TypeToken<List<Post>>() {}.getType();
 
-            Gson gson = new Gson();
-            Type listType = new TypeToken<List<Post>>() {}.getType();
-
-            List<Post> posts = gson.fromJson(feed, listType);
-            Collections.sort(posts, new Comparator<Post>() {
-                @Override
-                public int compare(Post post, Post t1) {
-                    return post.timestamp.compareTo(t1.timestamp);
-                }
-            });
+        List<Post> posts = gson.fromJson(bundle.getString(Constants.POSTS), listType);
+        Collections.sort(posts, new Comparator<Post>() {
+            @Override
+            public int compare(Post post, Post t1) {
+                return post.timestamp.compareTo(t1.timestamp);
+            }
+        });
 
 //            for (Post post:
 //                 posts) {
 //                System.out.println(post.timestamp);
 //            }
 
-            JsonParser jsonParser = new JsonParser();
-            MainFragment.feed = jsonParser.parse(gson.toJson(posts)).getAsJsonArray();
-        }
-        else {
-            MainFragment.feed = feed;
-        }
+        JsonParser jsonParser = new JsonParser();
+        feed = jsonParser.parse(gson.toJson(posts)).getAsJsonArray();
         if (adapter != null) {
-            adapter.changeDataset(MainFragment.feed);
+            adapter.addToDataset(feed, offset);
         }
         if (swipeRefreshLayout != null) {
             swipeRefreshLayout.setRefreshing(false);
@@ -223,7 +214,7 @@ public class MainFragment extends CommonFragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         recyclerView = (RecyclerView) rootView.findViewById(R.id.recycler);
-        adapter = new PostAdapter(getContext(), MainFragment.feed, Constants.POSTS_TYPE.FEED);
+        adapter = new PostAdapter(getContext(), MainFragment.feed, FEED);
         addImageButton = rootView.findViewById(R.id.add_image);
         destImage = rootView.findViewById(R.id.image_view);
 
@@ -255,6 +246,14 @@ public class MainFragment extends CommonFragment {
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setHasFixedSize(true);
+
+        recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                adapter.loadMore(totalItemsCount);
+            }
+        });
+
 
         RelativeLayout postButton = (RelativeLayout) rootView.findViewById(R.id.post_button);
         editText = (TextInputEditText) rootView.findViewById(R.id.write_post);

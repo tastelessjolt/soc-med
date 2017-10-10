@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -18,9 +17,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-
-import java.net.CookieStore;
+import com.google.gson.JsonParser;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -119,6 +118,12 @@ public class ProfileFragment extends CommonFragment {
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setHasFixedSize(true);
+        recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                adapter.loadMore(totalItemsCount);
+            }
+        });
 
 
 
@@ -158,10 +163,15 @@ public class ProfileFragment extends CommonFragment {
         mListener = null;
     }
 
-    public void setData(JsonArray jsonArray) {
+    public void setData(Bundle bundle) {
+
+        JsonParser jsonParser = new JsonParser();
+        JsonArray jsonArray = jsonParser.parse(bundle.getString(Constants.POSTS)).getAsJsonArray();
+
+        int offset = bundle.getInt(Constants.OFFSET);
         myPosts = jsonArray;
         if (adapter != null) {
-            adapter.changeDataset(jsonArray);
+            adapter.addToDataset(jsonArray, offset);
         }
         if (swipeRefreshLayout != null) {
             swipeRefreshLayout.setRefreshing(false);

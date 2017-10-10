@@ -13,6 +13,7 @@ import com.google.gson.JsonObject;
 import org.json.JSONArray;
 
 import java.lang.ref.WeakReference;
+import java.sql.BatchUpdateException;
 
 public class NetworkService extends Service {
 
@@ -29,22 +30,44 @@ public class NetworkService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             int what = intent.getIntExtra(Constants.WHAT, -1);
+            int offset = intent.getIntExtra(Constants.OFFSET, 0);
+            int limit = intent.getIntExtra(Constants.LIMIT, Constants.MAX_LIMIT);
             if (what == Constants.GET_NETWORK_STATE) {
                 tHandler.sendMessage(tHandler.obtainMessage(Constants.GET_NETWORK_STATE));
             }
             else if (what == Constants.GET_FEED) {
-                tHandler.sendMessage(tHandler.obtainMessage(Constants.GET_FEED));
+                Log.d(TAG, "Feed: Offset : " + offset + "Limit: " + limit);
+                Bundle bundle = intent.getBundleExtra(Constants.INTENT_DATA);
+                if (bundle == null) {
+                    bundle = new Bundle();
+                    bundle.putInt(Constants.OFFSET, offset);
+                    bundle.putInt(Constants.LIMIT, limit);
+                }
+                tHandler.sendMessage(tHandler.obtainMessage(Constants.GET_FEED, bundle));
             }
             else if (what == Constants.GET_MY_POSTS) {
-                tHandler.sendMessage(tHandler.obtainMessage(Constants.GET_MY_POSTS));
+                Bundle bundle = intent.getBundleExtra(Constants.INTENT_DATA);
+                if (bundle == null) {
+                    bundle = new Bundle();
+                    bundle.putInt(Constants.OFFSET, offset);
+                    bundle.putInt(Constants.LIMIT, limit);
+                }
+                tHandler.sendMessage(tHandler.obtainMessage(Constants.GET_MY_POSTS, bundle));
+            }
+            else if (what == Constants.GET_USER_POSTS) {
+                Bundle bundle = intent.getBundleExtra(Constants.INTENT_DATA);
+                if (bundle.getInt(Constants.OFFSET, -1) == -1){
+                    bundle.putInt(Constants.OFFSET, offset);
+                }
+                if (bundle.getInt(Constants.LIMIT, -1) == -1){
+                    bundle.putInt(Constants.LIMIT, limit);
+                }
+                tHandler.sendMessage(tHandler.obtainMessage(what, bundle));
             }
             else if (what == Constants.WRITE_POST) {
                 tHandler.sendMessage(tHandler.obtainMessage(what, intent.getBundleExtra(Constants.INTENT_DATA)));
             }
             else if (what == Constants.WRITE_COMMENT) {
-                tHandler.sendMessage(tHandler.obtainMessage(what, intent.getBundleExtra(Constants.INTENT_DATA)));
-            }
-            else if (what == Constants.GET_USER_POSTS) {
                 tHandler.sendMessage(tHandler.obtainMessage(what, intent.getBundleExtra(Constants.INTENT_DATA)));
             }
             else if (what == Constants.FOLLOW) {
@@ -83,18 +106,18 @@ public class NetworkService extends Service {
             }
         }
         else if (msg.what == Constants.GET_FEED) {
-            JsonObject jsonObject = (JsonObject) msg.obj;
-            if (jsonObject != null) {
+            Bundle bundle = (Bundle) msg.obj;
+            if (bundle != null) {
                 if (Constants.currHandler != null) {
-                    Constants.currHandler.sendMessage(Constants.currHandler.obtainMessage(Constants.GET_FEED, jsonObject));
+                    Constants.currHandler.sendMessage(Constants.currHandler.obtainMessage(Constants.GET_FEED, bundle));
                 }
             }
         }
         else if (msg.what == Constants.GET_MY_POSTS) {
-            JsonObject jsonObject = (JsonObject) msg.obj;
-            if (jsonObject != null) {
+            Bundle bundle = (Bundle) msg.obj;
+            if (bundle != null) {
                 if (Constants.currHandler != null) {
-                    Constants.currHandler.sendMessage(Constants.currHandler.obtainMessage(Constants.GET_MY_POSTS, jsonObject));
+                    Constants.currHandler.sendMessage(Constants.currHandler.obtainMessage(Constants.GET_MY_POSTS, bundle));
                 }
             }
         }

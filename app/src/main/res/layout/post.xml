@@ -22,6 +22,7 @@
             android:layout_height="wrap_content">
 
             <TextView
+                android:translationZ="10dp"
                 android:id="@+id/post_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -35,6 +36,7 @@
                 card_view:layout_constraintStart_toStartOf="parent" />
 
             <TextView
+                android:translationZ="10dp"
                 android:id="@+id/timestamp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

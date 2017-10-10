@@ -31,6 +31,7 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.CheckedOutputStream;
 
 /**
  * Created by harshithgoka on 03/10/17.
@@ -99,8 +100,11 @@ public class NetworkHandler extends Handler {
             sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, state));
         }
         else if (msg.what == Constants.GET_FEED) {
+            Bundle bundle = (Bundle) msg.obj;
+            int offset = bundle.getInt(Constants.OFFSET, 0);
+            int limit = bundle.getInt(Constants.LIMIT, Constants.MAX_LIMIT);
             try {
-                URL url = new URL(Constants.URL + "SeePosts");
+                URL url = new URL(Constants.URL + "SeePosts" + "?offset=" + offset + "&limit=" + limit);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 try {
                     connection.getHeaderFields();
@@ -113,7 +117,8 @@ public class NetworkHandler extends Handler {
                     Log.d(TAG, response.toString());
 
                     if (response.get("status").getAsBoolean()) {
-                        sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_FEED, response));
+                        bundle.putString(Constants.POSTS, response.get("data").getAsJsonArray().toString());
+                        sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_FEED, bundle));
                     } else {
                         sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_LOGGED_IN));
                     }
@@ -136,8 +141,11 @@ public class NetworkHandler extends Handler {
             }
         }
         else if (msg.what == Constants.GET_MY_POSTS) {
+            Bundle bundle = (Bundle) msg.obj;
+            int offset = bundle.getInt(Constants.OFFSET, 0);
+            int limit = bundle.getInt(Constants.LIMIT, Constants.MAX_LIMIT);
             try {
-                URL url = new URL(Constants.URL + "SeeMyPosts");
+                URL url = new URL(Constants.URL + "SeeMyPosts" + "?offset=" + offset + "&limit=" + limit);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 try {
                     connection.getHeaderFields();
@@ -150,7 +158,8 @@ public class NetworkHandler extends Handler {
                     Log.d(TAG, response.toString());
 
                     if (response.get("status").getAsBoolean()) {
-                        sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_MY_POSTS, response));
+                        bundle.putString(Constants.POSTS, response.get("data").getAsJsonArray().toString());
+                        sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_MY_POSTS, bundle));
                     } else {
                         sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_LOGGED_IN));
                     }
@@ -171,6 +180,67 @@ public class NetworkHandler extends Handler {
                 Log.d(TAG, e.toString());
                 sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
             }
+        }
+
+        else if (msg.what == Constants.GET_USER_POSTS) {
+            Bundle bundle = (Bundle) msg.obj;
+            int offset = bundle.getInt(Constants.OFFSET, 0);
+            int limit = bundle.getInt(Constants.LIMIT, Constants.MAX_LIMIT);
+            try {
+                URL url = new URL(Constants.URL + "SeeUserPosts");
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                try {
+                    connection.setRequestMethod("POST");
+                    connection.setDoOutput(true);
+                    connection.setDoInput(true);
+
+                    List<AbstractMap.SimpleEntry> list = new ArrayList<AbstractMap.SimpleEntry>();
+                    list.add(new AbstractMap.SimpleEntry("uid", ( (User) bundle.getSerializable(Constants.USER_DATA)).uid ));
+                    list.add(new AbstractMap.SimpleEntry("offset", "" + offset));
+                    list.add(new AbstractMap.SimpleEntry("limit", "" + limit));
+                    OutputStream os = connection.getOutputStream();
+                    BufferedWriter writer = new BufferedWriter(
+                            new OutputStreamWriter(os, "UTF-8"));
+                    writer.write(Utils.getQuery(list));
+                    writer.flush();
+                    writer.close();
+                    os.close();
+
+                    connection.getHeaderFields();
+
+                    if (!url.getHost().equals(connection.getURL().getHost())) {
+                        // we were redirected! Kick the user out to the browser to sign on?
+                        throw new Exception("Login to your internet provider");
+                    }
+
+
+                    JsonObject response = Utils.getAndParse(connection.getInputStream());
+                    Log.d(TAG, response.toString());
+
+                    if (response.get("status").getAsBoolean()) {
+                        bundle.putString(Constants.POSTS, response.get("data").getAsJsonArray().toString());
+                        sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_USER_POSTS, bundle));
+                    } else {
+                        sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_LOGGED_IN));
+                    }
+
+
+
+                } catch (Exception e) {
+                    Log.d(TAG, e.toString());
+                    sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
+                } finally {
+                    connection.disconnect();
+                }
+
+            } catch (MalformedURLException e) {
+                Log.d(TAG, e.toString());
+                sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
+            } catch (IOException e) {
+                Log.d(TAG, e.toString());
+                sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
+            }
+
         }
 
         else if (msg.what == Constants.WRITE_POST) {
@@ -265,17 +335,17 @@ public class NetworkHandler extends Handler {
                     BufferedWriter writer = new BufferedWriter(
                             new OutputStreamWriter(os, "UTF-8"));
                     writer.write(Utils.getQuery(list));
-                    writer.flush();
-                    writer.close();
-                    os.close();
-
-                    connection.getHeaderFields();
-
                     if (!url.getHost().equals(connection.getURL().getHost())) {
                         // we were redirected! Kick the user out to the browser to sign on?
                         throw new Exception("Login to your internet provider");
                     }
 
+
+                    writer.flush();
+                    writer.close();
+                    os.close();
+
+                    connection.getHeaderFields();
 
                     JsonObject response = Utils.getAndParse(connection.getInputStream());
                     Log.d(TAG, response.toString());
@@ -300,63 +370,6 @@ public class NetworkHandler extends Handler {
                 Log.d(TAG, e.toString());
                 sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
             }
-        }
-        else if (msg.what == Constants.GET_USER_POSTS) {
-            Bundle bundle = (Bundle) msg.obj;
-            try {
-                URL url = new URL(Constants.URL + "SeeUserPosts");
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                try {
-                    connection.setRequestMethod("POST");
-                    connection.setDoOutput(true);
-                    connection.setDoInput(true);
-
-                    List<AbstractMap.SimpleEntry> list = new ArrayList<AbstractMap.SimpleEntry>();
-                    list.add(new AbstractMap.SimpleEntry("uid", ( (User) bundle.getSerializable(Constants.USER_DATA)).uid ));
-
-                    OutputStream os = connection.getOutputStream();
-                    BufferedWriter writer = new BufferedWriter(
-                            new OutputStreamWriter(os, "UTF-8"));
-                    writer.write(Utils.getQuery(list));
-                    writer.flush();
-                    writer.close();
-                    os.close();
-
-                    connection.getHeaderFields();
-
-                    if (!url.getHost().equals(connection.getURL().getHost())) {
-                        // we were redirected! Kick the user out to the browser to sign on?
-                        throw new Exception("Login to your internet provider");
-                    }
-
-
-                    JsonObject response = Utils.getAndParse(connection.getInputStream());
-                    Log.d(TAG, response.toString());
-
-                    if (response.get("status").getAsBoolean()) {
-                        bundle.putString(Constants.POSTS, response.get("data").getAsJsonArray().toString());
-                        sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_USER_POSTS, bundle));
-                    } else {
-                        sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_LOGGED_IN));
-                    }
-
-
-
-                } catch (Exception e) {
-                    Log.d(TAG, e.toString());
-                    sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
-                } finally {
-                    connection.disconnect();
-                }
-
-            } catch (MalformedURLException e) {
-                Log.d(TAG, e.toString());
-                sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
-            } catch (IOException e) {
-                Log.d(TAG, e.toString());
-                sHandler.sendMessage(sHandler.obtainMessage(Constants.GET_NETWORK_STATE, Constants.NETWORK_STATE.NOT_CONNECTED));
-            }
-
         }
         else if (msg.what == Constants.FOLLOW) {
             Bundle bundle = (Bundle) msg.obj;

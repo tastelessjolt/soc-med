@@ -71,10 +71,34 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         }
     }
 
-    public void changeDataset(JsonArray dataset) {
-        data = dataset;
+    public void addToDataset(JsonArray dataset, int offset) {
+        if (data != null) {
+            JsonArray firstPart = new JsonArray();
+            for (int i = 0; i != offset; i ++)
+                firstPart.add(data.remove(0));
+
+            for (int i = 0; i != dataset.size(); i++)
+                if (data.size() > 0)
+                    data.remove(0);
+
+            for (int i = 0; i != dataset.size(); i++)
+                firstPart.add(dataset.get(i));
+
+            for (int i = 0; i != data.size(); i++)
+                firstPart.add(data.get(i));
+
+            data = firstPart;
+        }
+        else {
+            data = dataset;
+        }
         notifyDataSetChanged();
     }
+
+//    public void addDataToDataset (JsonArray extraData) {
+//        data.addAll(extraData);
+//        notifyDataSetChanged();
+//    }
 
     public PostAdapter(Context context, JsonArray jsonElements, Constants.POSTS_TYPE userPosts, User user) {
         this.type = userPosts;
@@ -91,6 +115,27 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                 "Dude", "I'm good dawg.",
                 "Zhang", "Noice! This is just me wanting to write a big passage to fill up the space, I know I could use lorem ipsum but I don't understand Latin or whatever language that is in. So bear with me. :P"};
 
+    }
+
+    public void loadMore(int offset) {
+        Intent intent = new Intent(context, NetworkService.class);
+        switch (type) {
+            case FEED:
+                intent.putExtra(Constants.WHAT, Constants.GET_FEED);
+                break;
+            case MY_POSTS:
+                intent.putExtra(Constants.WHAT, Constants.GET_MY_POSTS);
+                break;
+            case USER_POSTS:
+                Bundle bundle = new Bundle();
+                bundle.putSerializable(Constants.USER_DATA, user);
+                intent.putExtra(Constants.WHAT, Constants.GET_USER_POSTS);
+                intent.putExtra(Constants.INTENT_DATA, bundle);
+                break;
+        }
+        intent.putExtra(Constants.OFFSET, offset);
+        intent.putExtra(Constants.LIMIT, Constants.MAX_LIMIT);
+        context.startService(intent);
     }
 
     public void refreshDataset() {

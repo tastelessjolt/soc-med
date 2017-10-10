@@ -80,16 +80,13 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 else if (msg.what == Constants.GET_FEED) {
-                    JsonObject jsonObject = (JsonObject) msg.obj;
-                    if (jsonObject != null) {
-                        ( (MainFragment) mSectionsPagerAdapter.getItem(0)).setData(jsonObject.get("data").getAsJsonArray());
-                    }
+                    ( (MainFragment) mSectionsPagerAdapter.getItem(0)).setData((Bundle) msg.obj);
                 }
                 else if (msg.what == Constants.GET_MY_POSTS) {
-                    JsonObject jsonObject = (JsonObject) msg.obj;
-                    if (jsonObject != null) {
-                        ( (ProfileFragment) mSectionsPagerAdapter.getItem(2)).setData(jsonObject.get("data").getAsJsonArray());
-                    }
+                    ( (ProfileFragment) mSectionsPagerAdapter.getItem(2)).setData((Bundle) msg.obj);
+                }
+                else if (msg.what == Constants.GET_USER_POSTS) {
+                    ((SearchFragment) mSectionsPagerAdapter.getItem(1)).SetPosts((Bundle) msg.obj);
                 }
                 else if (msg.what == Constants.WRITE_POST) {
                     if (msg.arg1 == Constants.TRUE) {
@@ -123,9 +120,6 @@ public class MainActivity extends AppCompatActivity {
                             ((SearchFragment) mSectionsPagerAdapter.getItem(1)).WriteComment(false, bundle);
                         }
                     }
-                }
-                else if (msg.what == Constants.GET_USER_POSTS) {
-                    ((SearchFragment) mSectionsPagerAdapter.getItem(1)).SetPosts((Bundle) msg.obj);
                 }
                 else if (msg.what == Constants.FOLLOW || msg.what == Constants.UNFOLLOW) {
                     ( (SearchFragment) mSectionsPagerAdapter.getItem(1)).FollowCallback(msg.what, msg.arg1 ,(Bundle) msg.obj);

@@ -14,6 +14,7 @@ import java.lang.reflect.Type;
 public final class Constants {
     public static String URL = "http://10.4.65.62:8080/twitter-backend/";
 
+    public static int MAX_LIMIT = 5;
 
     public static String Name = "";
     public static String MISCSTATE = "MiscState";
@@ -31,6 +32,9 @@ public final class Constants {
     public static String POSTS = "Posts";
     public static String POST_TEXT = "PostText";
     public static String POST_IMG = "PostImg";
+    public static String OFFSET = "Offset";
+    public static String LIMIT = "Limit";
+
 
     public static int ACK = 0;
     public static int GET_NETWORK_STATE = 1;

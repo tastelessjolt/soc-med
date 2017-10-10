@@ -14,6 +14,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -238,66 +239,68 @@ public class SearchFragment extends CommonFragment {
         User user = (User) obj.getSerializable(Constants.USER_DATA);
         String postsStr = obj.getString(Constants.POSTS);
 
-//        Gson gson = new Gson();
-//        Type listType = new TypeToken<List<Post>>() {}.getType();
-
-//        List<Post> posts = gson.fromJson(postsStr, listType);
-
-
         JsonParser jsonParser = new JsonParser();
         JsonArray jsonElements = jsonParser.parse(postsStr).getAsJsonArray();
 
-        ( (TextView) getView().getRootView().findViewById(R.id.name)).setText(user.name);
-        ( (TextView) getView().getRootView().findViewById(R.id.username)).setText("(@" + user.uid + ")");
-
-        ( (AutoCompleteTextView) getView().getRootView().findViewById(R.id.search_bar)).setText("");
-        followButton = getView().getRootView().findViewById(R.id.follow_button);
-        followButton.setVisibility(View.VISIBLE);
-        if (user.following)
-            ( (TextView) followButton.findViewById(R.id.follow_button_text)).setText("UnFollow");
-        else
-            ( (TextView) followButton.findViewById(R.id.follow_button_text)).setText("Follow");
-        followButton.setOnClickListener(new FollowOnClickListener(user));
-
-        InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        mgr.hideSoftInputFromWindow(( (AutoCompleteTextView) getView().getRootView().findViewById(R.id.search_bar)).getWindowToken(), 0);
-
-        if (recyclerView == null) {
-
-
-            recyclerView = getView().getRootView().findViewById(R.id.profile_recycler);
-
-            swipeRefreshLayout = getView().getRootView().findViewById(R.id.profileswiperefresh);
-            swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-                @Override
-                public void onRefresh() {
-                    if (adapter != null) {
-                        adapter.refreshDataset();
-
-                    }
-                }
-            });
-
-
-
-            adapter = new PostAdapter(getContext(), jsonElements, Constants.POSTS_TYPE.USER_POSTS, user);
-
-            linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
-
-            recyclerView.setLayoutManager(linearLayoutManager);
-            recyclerView.setItemAnimator(new DefaultItemAnimator());
-            recyclerView.setHasFixedSize(true);
-            recyclerView.setAdapter(adapter);
-
-
+        if (adapter != null && adapter.user != null && adapter.user.uid.equals(user.uid)) {
+            adapter.addToDataset(jsonElements, obj.getInt(Constants.OFFSET));
         }
         else {
-            adapter.user = user;
-            adapter.setData(jsonElements);
-            adapter.notifyDataSetChanged();
-            swipeRefreshLayout.setRefreshing(false);
+
+            ((TextView) getView().getRootView().findViewById(R.id.name)).setText(user.name);
+            ((TextView) getView().getRootView().findViewById(R.id.username)).setText("(@" + user.uid + ")");
+
+            ((AutoCompleteTextView) getView().getRootView().findViewById(R.id.search_bar)).setText("");
+            followButton = getView().getRootView().findViewById(R.id.follow_button);
+            followButton.setVisibility(View.VISIBLE);
+            if (user.following)
+                ((TextView) followButton.findViewById(R.id.follow_button_text)).setText("UnFollow");
+            else
+                ((TextView) followButton.findViewById(R.id.follow_button_text)).setText("Follow");
+            followButton.setOnClickListener(new FollowOnClickListener(user));
+
+            InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            mgr.hideSoftInputFromWindow(((AutoCompleteTextView) getView().getRootView().findViewById(R.id.search_bar)).getWindowToken(), 0);
+
+            if (recyclerView == null) {
+                recyclerView = getView().getRootView().findViewById(R.id.profile_recycler);
+
+                swipeRefreshLayout = getView().getRootView().findViewById(R.id.profileswiperefresh);
+                swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        if (adapter != null) {
+                            adapter.refreshDataset();
+
+                        }
+                    }
+                });
+
+
+                adapter = new PostAdapter(getContext(), jsonElements, Constants.POSTS_TYPE.USER_POSTS, user);
+
+                linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+
+                recyclerView.setLayoutManager(linearLayoutManager);
+                recyclerView.setItemAnimator(new DefaultItemAnimator());
+                recyclerView.setHasFixedSize(true);
+                recyclerView.setAdapter(adapter);
+                recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
+                    @Override
+                    public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                        adapter.loadMore(totalItemsCount);
+                    }
+                });
+
+
+            } else {
+                adapter.user = user;
+                adapter.setData(jsonElements);
+                adapter.notifyDataSetChanged();
+                swipeRefreshLayout.setRefreshing(false);
+            }
         }
-}
+    }
 
     /**
      * This interface must be implemented by activities that contain this
