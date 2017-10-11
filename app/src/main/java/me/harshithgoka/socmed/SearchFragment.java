@@ -255,20 +255,17 @@ public class SearchFragment extends CommonFragment {
 
                 linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
 
+                recyclerView.setAdapter(adapter);
                 recyclerView.setLayoutManager(linearLayoutManager);
                 recyclerView.setItemAnimator(new DefaultItemAnimator());
-                recyclerView.setHasFixedSize(true);
-                recyclerView.setAdapter(adapter);
+                recyclerView.addOnScrollListener(new RecyclerViewScrollListener(linearLayoutManager));
 
-                if (linearLayoutManager != null) {
-                    recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
-                        @Override
-                        public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-                            adapter.loadMore(totalItemsCount);
-                        }
-                    });
-                }
-
+//                recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
+//                    @Override
+//                    public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+//                        adapter.loadMore(totalItemsCount);
+//                    }
+//                });
 
             } else {
                 adapter.user = user;

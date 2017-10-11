@@ -132,8 +132,7 @@ public class MainFragment extends CommonFragment {
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.setHasFixedSize(true);
-        recyclerView.addOnScrollListener(new RecyclerViewScrollListener());
+        recyclerView.addOnScrollListener(new RecyclerViewScrollListener(linearLayoutManager));
 
 //        recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
 //            @Override
@@ -273,57 +272,4 @@ public class MainFragment extends CommonFragment {
                 break;
         }
     }
-
-    class RecyclerViewScrollListener extends RecyclerView.OnScrollListener {
-
-        @Override
-        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-            Log.d(TAG, "D Y - " + dy);
-
-//            if (dy > 0 && linearLayoutManager != null && adapter != null) {
-//                int totalNum = linearLayoutManager.getItemCount();
-//                int currNum = linearLayoutManager.getChildCount();
-//                int currFirstPos = linearLayoutManager.findFirstVisibleItemPosition();
-//
-//                if ( (currFirstPos + currNum >= totalNum) && !adapter.loading ) {
-//                    adapter.loading = true;
-//                    ( (PostAdapter) recyclerView.getAdapter() ).loadMore(totalNum);
-//                }
-//
-//            }
-        }
-
-        @Override
-        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-
-            if (linearLayoutManager != null && adapter != null) {
-                int totalNum = linearLayoutManager.getItemCount();
-                int currNum = linearLayoutManager.getChildCount();
-                int currFirstPos = linearLayoutManager.findFirstVisibleItemPosition();
-
-                if ( (currFirstPos + currNum >= totalNum) && !adapter.loading ) {
-                    adapter.loading = true;
-                    ( (PostAdapter) recyclerView.getAdapter() ).loadMore(totalNum);
-                }
-
-            }
-
-            Log.d(TAG, "ScrollState - " + newState);
-            switch (newState) {
-                case RecyclerView.SCROLL_STATE_SETTLING:
-                    Log.d(TAG, "ScrollState - Settling");
-                    break;
-
-                case RecyclerView.SCROLL_STATE_IDLE:
-                    Log.d(TAG, "ScrollState - Idle");
-                    break;
-
-                case RecyclerView.SCROLL_STATE_DRAGGING:
-                    Log.d(TAG, "ScrollState - Dragging");
-                    break;
-            }
-        }
-    }
-
-
 }

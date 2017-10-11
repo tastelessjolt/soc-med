@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.widget.LinearLayoutManager;
@@ -90,67 +91,96 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         }
     }
 
-    public void addToDataset(JsonArray dataset, int offset) {
+    class AddDatasetAsyncTask extends AsyncTask<JsonArray, Void, Boolean> {
 
-        if (dataset == null){
-            return;
+        int offset;
+        AddDatasetAsyncTask(int offset) {
+            this.offset = offset;
         }
 
-        Gson gson = new Gson();
-        Type listType = new TypeToken<List<Post>>() {}.getType();
+        @Override
+        protected Boolean doInBackground(JsonArray... params) {
+            JsonArray dataset = params[0];
+            Gson gson = new Gson();
+            Type listType = new TypeToken<List<Post>>() {}.getType();
 
-        List<Post> posts = gson.fromJson(dataset, listType);
-        if (type == Constants.POSTS_TYPE.FEED) {
-            Collections.sort(posts, new Comparator<Post>() {
-                @Override
-                public int compare(Post post, Post t1) {
-                    return post.timestamp.compareTo(t1.timestamp);
-                }
-            });
-        }
-        else {
-            Collections.sort(posts, new Comparator<Post>() {
-                @Override
-                public int compare(Post post, Post t1) {
-                    return -post.timestamp.compareTo(t1.timestamp);
-                }
-            });
-        }
-        JsonParser jsonParser = new JsonParser();
-        dataset = jsonParser.parse(gson.toJson(posts)).getAsJsonArray();
+            List<Post> posts = gson.fromJson(dataset, listType);
+            if (type == Constants.POSTS_TYPE.FEED) {
+                Collections.sort(posts, new Comparator<Post>() {
+                    @Override
+                    public int compare(Post post, Post t1) {
+                        return post.timestamp.compareTo(t1.timestamp);
+                    }
+                });
+            }
+            else {
+                Collections.sort(posts, new Comparator<Post>() {
+                    @Override
+                    public int compare(Post post, Post t1) {
+                        return -post.timestamp.compareTo(t1.timestamp);
+                    }
+                });
+            }
+            JsonParser jsonParser = new JsonParser();
+            dataset = jsonParser.parse(gson.toJson(posts)).getAsJsonArray();
 
 //        Log.d(TAG, type.toString());
-        if (data != null && data.size() > 0) {
-            JsonArray firstPart = new JsonArray();
-            for (int i = 0; i != offset; i ++)
-                if (data.size() > 0)
-                    firstPart.add(data.remove(0));
+            if (data != null && data.size() > 0) {
+                JsonArray firstPart = new JsonArray();
+                for (int i = 0; i != offset; i ++)
+                    if (data.size() > 0)
+                        firstPart.add(data.remove(0));
 
 
-            for (int i = 0; i != dataset.size(); i++) {
-                if (data.size() > 0)
-                    data.remove(0);
-                else
-                    break;
+                for (int i = 0; i != dataset.size(); i++) {
+                    if (data.size() > 0)
+                        data.remove(0);
+                    else
+                        break;
+                }
+
+                for (int i = 0; i != dataset.size(); i++)
+                    firstPart.add(dataset.get(i));
+
+                for (int i = 0; i != data.size(); i++)
+                    firstPart.add(data.get(i));
+
+                data = firstPart;
             }
+            else {
+                data = new JsonArray();
+                for (int i = 0; i != dataset.size(); i++)
+                    data.add(dataset.get(i));
+            }
+            return true;
+        }
 
-            for (int i = 0; i != dataset.size(); i++)
-                firstPart.add(dataset.get(i));
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            super.onPostExecute(aBoolean);
 
-            for (int i = 0; i != data.size(); i++)
-                firstPart.add(data.get(i));
+            notifyDataSetChanged();
+            loading = false;
+        }
+    }
 
-            data = firstPart;
+    public void addToDataset(JsonArray dataset, int offset) {
+
+        if ( (dataset == null || dataset.size() == 0)){
+            if (offset == 0) {
+                if (data != null ) {
+                    data = null;
+                }
+            }
+            notifyDataSetChanged();
+            loading = false;
         }
         else {
-            data = new JsonArray();
-            for (int i = 0; i != dataset.size(); i++)
-                data.add(dataset.get(i));
+            AddDatasetAsyncTask task = new AddDatasetAsyncTask(offset);
+            task.execute(dataset);
         }
-        notifyDataSetChanged();
-
-        loading = false;
-
+//        notifyDataSetChanged();
+//        loading = false;
     }
 
 //    public void addDataToDataset (JsonArray extraData) {
@@ -345,7 +375,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         if (data != null)
             return data.size();
         else
-            return dummy_dataset.length/2;
+            return 0;
     }
 
 
