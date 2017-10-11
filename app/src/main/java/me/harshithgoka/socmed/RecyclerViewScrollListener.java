@@ -33,19 +33,19 @@ public class RecyclerViewScrollListener extends RecyclerView.OnScrollListener {
             }
         }
 
-            Log.d(TAG, "ScrollState - " + newState);
-            switch (newState) {
-                case RecyclerView.SCROLL_STATE_SETTLING:
-                    Log.d(TAG, "ScrollState - Settling");
-                    break;
-
-                case RecyclerView.SCROLL_STATE_IDLE:
-                    Log.d(TAG, "ScrollState - Idle");
-                    break;
-
-                case RecyclerView.SCROLL_STATE_DRAGGING:
-                    Log.d(TAG, "ScrollState - Dragging");
-                    break;
-            }
+//        Log.d(TAG, "ScrollState - " + newState);
+//        switch (newState) {
+//            case RecyclerView.SCROLL_STATE_SETTLING:
+//                Log.d(TAG, "ScrollState - Settling");
+//                break;
+//
+//            case RecyclerView.SCROLL_STATE_IDLE:
+//                Log.d(TAG, "ScrollState - Idle");
+//                break;
+//
+//            case RecyclerView.SCROLL_STATE_DRAGGING:
+//                Log.d(TAG, "ScrollState - Dragging");
+//                break;
+//        }
     }
 }
