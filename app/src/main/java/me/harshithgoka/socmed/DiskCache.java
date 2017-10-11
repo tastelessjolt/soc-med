@@ -135,6 +135,7 @@ public class DiskCache {
             if (b) {
                 if (holder != null && uri != null)
                     holder.setImageUri(uri);
+
             }
         }
     }

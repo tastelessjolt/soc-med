@@ -57,6 +57,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     Context context;
     Constants.POSTS_TYPE type;
     User user;
+    ProgressBar imageLoading;
 
 
     // / Provide a reference to the views for each data item
@@ -120,11 +121,17 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         public void setImageUri(Uri imageUri) {
             this.imageUri = imageUri;
             ImageView imageView;
+            mLin.findViewById(R.id.image_loading).setVisibility(View.GONE);
+
             if (mLin != null && (imageView = mLin.findViewById(R.id.image)) != null ) {
 
-                imageView.setImageURI(imageUri);
+                try {
 //                Log.d(TAG,  "MaxWidth = "  + imageView.getMaxWidth() + " or " + imageView.getRootView().getMeasuredWidth());
-//                imageView.setImageBitmap(decodeSampledBitmapFile(new File(imageUri.getPath()), imageView.getRootView().getMeasuredWidth(), 0));
+                    imageView.setImageBitmap(decodeSampledBitmapFile(new File(imageUri.getPath()), imageView.getRootView().getMeasuredWidth(), 0));
+                }
+                catch (Exception e) {
+                    imageView.setImageURI(imageUri);
+                }
             }
         }
     }
@@ -279,12 +286,15 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             JsonElement imageid;
             ImageView image = holder.mLin.findViewById(R.id.image);
             if((imageid = object.get("imageid")) != null) {
-//                image.setImageResource(0);
+                image.setImageResource(0);
+                holder.mLin.findViewById(R.id.image_loading).setVisibility(View.VISIBLE);
                 DiskCache.getImage(imageid.getAsString(), holder);
             }
             else {
+                holder.mLin.findViewById(R.id.image_loading).setVisibility(View.GONE);
                 image.setImageResource(0);
             }
+
 
             JsonArray comments = object.getAsJsonArray("Comment");
 

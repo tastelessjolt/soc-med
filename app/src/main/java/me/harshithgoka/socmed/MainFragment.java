@@ -2,6 +2,8 @@ package me.harshithgoka.socmed;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -27,6 +29,9 @@ import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Comparator;
@@ -67,22 +72,6 @@ public class MainFragment extends CommonFragment {
 
     public void setData(Bundle bundle) {
         int offset = bundle.getInt(Constants.OFFSET);
-//        Gson gson = new Gson();
-//        Type listType = new TypeToken<List<Post>>() {}.getType();
-//
-//        List<Post> posts = gson.fromJson(bundle.getString(Constants.POSTS), listType);
-//        Collections.sort(posts, new Comparator<Post>() {
-//            @Override
-//            public int compare(Post post, Post t1) {
-//                return post.timestamp.compareTo(t1.timestamp);
-//            }
-//        });
-
-//            for (Post post:
-//                 posts) {
-//                System.out.println(post.timestamp);
-//            }
-
         JsonParser jsonParser = new JsonParser();
         feed = jsonParser.parse(bundle.getString(Constants.POSTS)).getAsJsonArray();
         if (adapter != null) {
@@ -171,6 +160,56 @@ public class MainFragment extends CommonFragment {
         }
     }
 
+    public int calculateInSampleSize(
+            BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight/2 || width > reqWidth/2) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfWidth / inSampleSize) >= reqWidth / 2) {
+                inSampleSize *= 2;
+            }
+        }
+
+        Log.d(TAG, "inSampleSize - " + inSampleSize + " " + width + " " + height + " " + reqWidth + " " + reqHeight);
+
+        return inSampleSize;
+    }
+
+    public Bitmap decodeSampledBitmapFile(Uri uri, int reqWidth, int reqHeight) {
+
+        try {
+            InputStream ims = getContext().getContentResolver().openInputStream(uri);
+            // First decode with inJustDecodeBounds=true to check dimensions
+            final BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeStream(ims, null, options);
+//        BitmapFactory.decodeResource(res, resId, options);
+
+            // Calculate inSampleSize
+            options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+            // Decode bitmap with inSampleSize set
+            options.inJustDecodeBounds = false;
+            ims = getContext().getContentResolver().openInputStream(uri);
+            return BitmapFactory.decodeStream(ims, null, options);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
         super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
         switch(requestCode) {
@@ -183,7 +222,7 @@ public class MainFragment extends CommonFragment {
                     }
                     else {
                         Uri selectedImage = imageReturnedIntent.getData();
-                        destImage.setImageURI(selectedImage);
+                        destImage.setImageBitmap(decodeSampledBitmapFile(selectedImage, destImage.getRootView().getMeasuredWidth(), 0));
                         imageUri = selectedImage;
                     }
                 }
