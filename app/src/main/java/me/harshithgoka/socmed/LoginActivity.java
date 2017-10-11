@@ -37,6 +37,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
+import java.net.CookiePolicy;
 import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -184,6 +185,10 @@ public class LoginActivity extends AppCompatActivity {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
+
+            CookieManager cookieManager = new CookieManager(new MyCookieStore(getApplicationContext()), CookiePolicy.ACCEPT_ALL);
+            CookieHandler.setDefault(cookieManager);
+
             mAuthTask = new UserLoginTask(username, password);
             mAuthTask.execute((Void) null);
         }
