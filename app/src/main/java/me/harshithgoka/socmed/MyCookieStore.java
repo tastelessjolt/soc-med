@@ -38,27 +38,24 @@ public class MyCookieStore implements CookieStore {
         spePreferences = context.getSharedPreferences("CookiePrefFile", 0);
         Map <String, ?> all = spePreferences.getAll();
 
+        System.out.println(all);
+
         for (Map.Entry<String, ?> entry : all.entrySet()) {
             for (String strCookie :  (HashSet<String>) entry.getValue() ) {
+                List<HttpCookie> listCookies;
                 if (!mapCookies.containsKey(entry.getKey())) {
-                    List<HttpCookie> listCookies = new ArrayList<>();
-                    listCookies.addAll(HttpCookie.parse(strCookie));
-
-                    try {
-                        mapCookies.put(new URI(entry.getKey()), listCookies);
-                    } catch (URISyntaxException e) {
-                        e.printStackTrace();
-                    }
+                    listCookies = new ArrayList<>();
                 }
                 else {
-                    List<HttpCookie> listCookies = mapCookies.get(entry.getKey());
-                    listCookies.addAll(HttpCookie.parse(strCookie));
+                    listCookies = mapCookies.get(entry.getKey());
+                }
 
-                    try {
-                        mapCookies.put(new URI(entry.getKey()), listCookies);
-                    } catch (URISyntaxException e) {
-                        e.printStackTrace();
-                    }
+                listCookies.addAll(HttpCookie.parse(strCookie));
+
+                try {
+                    mapCookies.put(new URI(entry.getKey()), listCookies);
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
                 }
 
                 Log.d(TAG,entry.getKey() + ": " + strCookie);
@@ -83,9 +80,14 @@ public class MyCookieStore implements CookieStore {
         cookies.add(httpCookie);
 
         SharedPreferences.Editor editor = spePreferences.edit();
+//        HashSet<String> setCookies = new HashSet<>();
+//        setCookies.add(httpCookie.toString());
+//        setCookies.addAll(mapCookies.get())
         HashSet<String> setCookies = new HashSet<>();
-        setCookies.add(httpCookie.toString());
-        editor.putStringSet(uri.toString(), spePreferences.getStringSet(uri.toString(), setCookies));
+        for (int i = 0 ; i != cookies.size(); i++)
+            setCookies.add(cookies.get(i).toString());
+
+        editor.putStringSet(uri.toString(), setCookies);
         editor.commit();
     }
 
@@ -120,6 +122,8 @@ public class MyCookieStore implements CookieStore {
     public boolean remove(URI uri, HttpCookie httpCookie) {
         uri = getAuthorityUri(uri);
         List<HttpCookie> cookies = mapCookies.get(uri);
+
+
 
         if (cookies == null)
             return false;
