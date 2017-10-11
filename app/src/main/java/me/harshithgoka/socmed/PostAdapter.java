@@ -70,7 +70,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         public LinearLayout mLin;
         public boolean more;
         public Uri imageUri;
-        public Bitmap bitmap;
         public ViewHolder(LinearLayout v) {
             super(v);
             mLin = v;
@@ -78,69 +77,15 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             imageUri = null;
         }
 
-        public int calculateInSampleSize(
-                BitmapFactory.Options options, int reqWidth, int reqHeight) {
-            // Raw height and width of image
-            final int height = options.outHeight;
-            final int width = options.outWidth;
-            int inSampleSize = 1;
-
-            if (height > reqHeight/2 || width > reqWidth/2) {
-
-                final int halfHeight = height / 2;
-                final int halfWidth = width / 2;
-
-                // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-                // height and width larger than the requested height and width.
-                while ((halfWidth / inSampleSize) >= reqWidth / 2) {
-                    inSampleSize *= 2;
-                }
-            }
-
-            Log.d(TAG, "inSampleSize - " + inSampleSize + " " + width + " " + height + " " + reqWidth + " " + reqHeight);
-
-            return inSampleSize;
-        }
-
-        public Bitmap decodeSampledBitmapFile(File file, int reqWidth, int reqHeight) {
-
-            // First decode with inJustDecodeBounds=true to check dimensions
-            final BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(file.getAbsolutePath(), options);
-//        BitmapFactory.decodeResource(res, resId, options);
-
-            // Calculate inSampleSize
-            options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-
-            // Decode bitmap with inSampleSize set
-            options.inJustDecodeBounds = false;
-            return BitmapFactory.decodeFile(file.getAbsolutePath(), options);
-        }
-
-        public void loadBitmapInMemory (Uri imageUri) {
-            this.imageUri = imageUri;
-            ImageView imageView;
-
-            if (mLin != null && (imageView = mLin.findViewById(R.id.image)) != null ) {
-
-                try {
-//                Log.d(TAG,  "MaxWidth = "  + imageView.getMaxWidth() + " or " + imageView.getRootView().getMeasuredWidth());
-                    bitmap = decodeSampledBitmapFile(new File(imageUri.getPath()), imageView.getRootView().getMeasuredWidth(), 0);
-                }
-                catch (Exception e) {
-                    bitmap = BitmapFactory.decodeFile(new File(imageUri.getPath()).getAbsolutePath());
-                }
-            }
-        }
-
-
-        public void setImage() {
-            ImageView imageView;
+        public void setImage(Bitmap bitmap) {
+            ImageView imageView = null;
             mLin.findViewById(R.id.image_loading).setVisibility(View.GONE);
-
-            if (mLin != null && (imageView = mLin.findViewById(R.id.image)) != null && bitmap != null) {
+            imageView = mLin.findViewById(R.id.image);
+            if (mLin != null && imageView != null && bitmap != null) {
                 imageView.setImageBitmap(bitmap);
+            }
+            else if (imageView != null){
+                imageView.setImageResource(0);
             }
         }
     }
