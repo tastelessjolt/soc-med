@@ -62,9 +62,18 @@ public class MainFragment extends CommonFragment {
 
     public static final String TAG = MainFragment.class.getName();
 
+    private static JsonArray feed;
+
     ImageView addImageButton;
     ImageView destImage;
     Uri imageUri;
+    TextInputEditText editText;
+    ProgressBar progressBar;
+    TextView postButtonText;
+
+    public MainFragment() {
+
+    }
 
     public JsonArray getFeed() {
         return feed;
@@ -82,17 +91,6 @@ public class MainFragment extends CommonFragment {
         }
     }
 
-    private static JsonArray feed;
-
-
-    TextInputEditText editText;
-    ProgressBar progressBar;
-    TextView postButtonText;
-
-    public MainFragment() {
-
-    }
-
     /**
      * Returns a new instance of this fragment for the given section
      * number.
@@ -108,6 +106,62 @@ public class MainFragment extends CommonFragment {
         context.startService(intent);
 
         return fragment;
+    }
+
+    @Override
+    public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
+                             Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        recyclerView = (RecyclerView) rootView.findViewById(R.id.recycler);
+        if (adapter == null)
+            adapter = new PostAdapter(getContext(), MainFragment.feed, FEED);
+
+        destImage = rootView.findViewById(R.id.image_view);
+
+        addImageButton = rootView.findViewById(R.id.add_image);
+        addImageButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent pickPhoto = new Intent(Intent.ACTION_PICK,
+                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(pickPhoto, 0);
+            }
+        });
+
+        linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setHasFixedSize(true);
+        recyclerView.addOnScrollListener(new RecyclerViewScrollListener());
+
+//        recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
+//            @Override
+//            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+//                adapter.loadMore(totalItemsCount);
+//            }
+//        });
+
+
+        RelativeLayout postButton = (RelativeLayout) rootView.findViewById(R.id.post_button);
+        editText = (TextInputEditText) rootView.findViewById(R.id.write_post);
+        progressBar = (ProgressBar) rootView.findViewById(R.id.write_post_progress);
+        postButtonText = (TextView) rootView.findViewById(R.id.post_button_text);
+
+
+        postButton.setOnClickListener(new SendPostOnClickListener(editText, progressBar, postButtonText, destImage));
+
+        swipeRefreshLayout = rootView.findViewById(R.id.swiperefresh);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                Log.d(TAG, "Refresh received");
+
+                adapter.refreshDataset();
+            }
+        });
+
+        return rootView;
     }
 
     public class SendPostOnClickListener implements OnClickListener {
@@ -178,9 +232,7 @@ public class MainFragment extends CommonFragment {
                 inSampleSize *= 2;
             }
         }
-
-        Log.d(TAG, "inSampleSize - " + inSampleSize + " " + width + " " + height + " " + reqWidth + " " + reqHeight);
-
+//        Log.d(TAG, "inSampleSize - " + inSampleSize + " " + width + " " + height + " " + reqWidth + " " + reqHeight);
         return inSampleSize;
     }
 
@@ -192,7 +244,6 @@ public class MainFragment extends CommonFragment {
             final BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
             BitmapFactory.decodeStream(ims, null, options);
-//        BitmapFactory.decodeResource(res, resId, options);
 
             // Calculate inSampleSize
             options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
@@ -215,103 +266,64 @@ public class MainFragment extends CommonFragment {
         switch(requestCode) {
             case 0:
                 if(resultCode == RESULT_OK){
-                    if (Objects.equals(imageReturnedIntent.getAction(), MediaStore.ACTION_IMAGE_CAPTURE)) {
-                        Uri uri = getCaptureImageOutputUri();
-                        destImage.setImageURI(uri);
-                        imageUri = uri;
-                    }
-                    else {
-                        Uri selectedImage = imageReturnedIntent.getData();
-                        destImage.setImageBitmap(decodeSampledBitmapFile(selectedImage, destImage.getRootView().getMeasuredWidth(), 0));
-                        imageUri = selectedImage;
-                    }
+                    Uri selectedImage = imageReturnedIntent.getData();
+                    destImage.setImageBitmap(decodeSampledBitmapFile(selectedImage, destImage.getRootView().getMeasuredWidth(), 0));
+                    imageUri = selectedImage;
                 }
                 break;
         }
     }
 
-    /**
-     * Get URI to image received from capture by camera.
-     */
-    private Uri getCaptureImageOutputUri() {
-        Uri outputFileUri = null;
+    class RecyclerViewScrollListener extends RecyclerView.OnScrollListener {
 
-        File getImage = getContext().getFilesDir();
+        @Override
+        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            Log.d(TAG, "D Y - " + dy);
 
-        if (getImage != null) {
-            File imagePath = new File(getImage, "images");
-            File newFile = new File(imagePath, "temp.jpg");
-            outputFileUri = getUriForFile(getContext(), "me.harshithgoka.socmed", newFile);
-
-
-        }
-        return outputFileUri;
-    }
-
-    @Override
-    public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
-                             Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        recyclerView = (RecyclerView) rootView.findViewById(R.id.recycler);
-        if (adapter == null)
-            adapter = new PostAdapter(getContext(), MainFragment.feed, FEED);
-        addImageButton = rootView.findViewById(R.id.add_image);
-        destImage = rootView.findViewById(R.id.image_view);
-
-        addImageButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent pickPhoto = new Intent(Intent.ACTION_PICK,
-                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-
-//                Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//                takePicture.putExtra(MediaStore.EXTRA_OUTPUT, getCaptureImageOutputUri());
-//                takePicture.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+//            if (dy > 0 && linearLayoutManager != null && adapter != null) {
+//                int totalNum = linearLayoutManager.getItemCount();
+//                int currNum = linearLayoutManager.getChildCount();
+//                int currFirstPos = linearLayoutManager.findFirstVisibleItemPosition();
 //
-//                Intent chooserIntent = Intent.createChooser(takePicture, "Choose between Camera and Gallery");
-//                chooserIntent.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-//                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] { pickPhoto });
+//                if ( (currFirstPos + currNum >= totalNum) && !adapter.loading ) {
+//                    adapter.loading = true;
+//                    ( (PostAdapter) recyclerView.getAdapter() ).loadMore(totalNum);
+//                }
+//
+//            }
+        }
 
+        @Override
+        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
 
-                startActivityForResult(pickPhoto, 0);
+            if (linearLayoutManager != null && adapter != null) {
+                int totalNum = linearLayoutManager.getItemCount();
+                int currNum = linearLayoutManager.getChildCount();
+                int currFirstPos = linearLayoutManager.findFirstVisibleItemPosition();
+
+                if ( (currFirstPos + currNum >= totalNum) && !adapter.loading ) {
+                    adapter.loading = true;
+                    ( (PostAdapter) recyclerView.getAdapter() ).loadMore(totalNum);
+                }
+
             }
-        });
 
-        recyclerView.setAdapter(adapter);
-        linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
-        recyclerView.setLayoutManager(linearLayoutManager);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.setHasFixedSize(true);
+            Log.d(TAG, "ScrollState - " + newState);
+            switch (newState) {
+                case RecyclerView.SCROLL_STATE_SETTLING:
+                    Log.d(TAG, "ScrollState - Settling");
+                    break;
 
-        recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
-            @Override
-            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-                adapter.loadMore(totalItemsCount);
+                case RecyclerView.SCROLL_STATE_IDLE:
+                    Log.d(TAG, "ScrollState - Idle");
+                    break;
+
+                case RecyclerView.SCROLL_STATE_DRAGGING:
+                    Log.d(TAG, "ScrollState - Dragging");
+                    break;
             }
-        });
-
-
-        RelativeLayout postButton = (RelativeLayout) rootView.findViewById(R.id.post_button);
-        editText = (TextInputEditText) rootView.findViewById(R.id.write_post);
-        progressBar = (ProgressBar) rootView.findViewById(R.id.write_post_progress);
-        postButtonText = (TextView) rootView.findViewById(R.id.post_button_text);
-
-
-        postButton.setOnClickListener(new SendPostOnClickListener(editText, progressBar, postButtonText, destImage));
-
-        swipeRefreshLayout = rootView.findViewById(R.id.swiperefresh);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                Log.d(TAG, "Refresh received");
-
-                adapter.refreshDataset();
-            }
-        });
-
-//        adapter.refreshDataset();
-        Log.d(TAG, "Which Tab? " + getArguments().getInt(ARG_SECTION_NUMBER, -1) + "");
-//            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
-        return rootView;
+        }
     }
+
+
 }

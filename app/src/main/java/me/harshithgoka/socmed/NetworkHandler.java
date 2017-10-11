@@ -1,14 +1,17 @@
 package me.harshithgoka.socmed;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Base64OutputStream;
 import android.util.Log;
 
 import com.google.gson.JsonArray;
@@ -18,10 +21,12 @@ import com.google.gson.JsonParser;
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
+import java.io.FilterWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
@@ -29,6 +34,7 @@ import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +53,23 @@ public class NetworkHandler extends Handler {
     NetworkHandler(Looper looper, Handler handler) {
         super(looper);
         sHandler = handler;
+    }
+
+    public class URLEncodedWriter extends OutputStream {
+        Writer out;
+        public URLEncodedWriter(Writer out) {
+            this.out = out;
+        }
+
+        @Override
+        public void write(int c) throws IOException {
+            out.write(URLEncoder.encode("" + ((char) c), "UTF-8"));
+        }
+
+        @Override
+        public void write(@NonNull byte[] b, int off, int len) throws IOException {
+            out.write(URLEncoder.encode(new String(b, off, len), "UTF-8"));
+        }
     }
 
     @Override
@@ -247,11 +270,11 @@ public class NetworkHandler extends Handler {
 
         else if (msg.what == Constants.WRITE_POST) {
             Bundle bundle = (Bundle) msg.obj;
-            Bitmap bitmap = null;
+            InputStream stream = null;
             if ( !bundle.getString( Constants.POST_IMG,"").equals("") ) {
                 Uri imgUri = Uri.parse(bundle.getString(Constants.POST_IMG));
                 try {
-                    bitmap = MediaStore.Images.Media.getBitmap(Storage.getContext().getContentResolver(),imgUri);
+                    stream = Storage.getContext().getContentResolver().openInputStream(imgUri);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -268,20 +291,26 @@ public class NetworkHandler extends Handler {
 
                     List<AbstractMap.SimpleEntry> list = new ArrayList<AbstractMap.SimpleEntry>();
                     list.add(new AbstractMap.SimpleEntry<String, String>("content", bundle.getString(Constants.POST_TEXT)));
-                    String base64 = "";
-                    if (bitmap != null) {
-                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, 60, stream);
-                        byte[] byteArray = stream.toByteArray();
-                        base64 = Base64.encodeToString(byteArray, Base64.DEFAULT);
-                        list.add(new AbstractMap.SimpleEntry<String, String>("image", base64));
-                    }
+                    list.add(new AbstractMap.SimpleEntry<String, String>("image", ""));
+
                     OutputStream os = connection.getOutputStream();
                     BufferedWriter writer = new BufferedWriter(
                             new OutputStreamWriter(os, "ASCII"));
                     String out = Utils.getQuery(list);
                     writer.write(out);
                     writer.flush();
+
+                    if (stream != null) {
+                        URLEncodedWriter urlEncodedWriter = new URLEncodedWriter(writer);
+                        Base64OutputStream base64OutputStream = new Base64OutputStream(urlEncodedWriter, Base64.DEFAULT);
+
+                        int nbytes;
+                        byte[] bytes = new byte[1024 * 512];
+                        while ( (nbytes = stream.read(bytes, 0, 1024 * 512)) >= 0 ) {
+                            base64OutputStream.write(bytes, 0, nbytes);
+                            writer.flush();
+                        }
+                    }
                     writer.close();
                     os.close();
 

@@ -43,7 +43,13 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     public static final String TAG = PostAdapter.class.getName();
 
     public String[] dummy_dataset;
+    public JsonArray data = null;
+    Context context;
+    Constants.POSTS_TYPE type;
+    User user;
+    ProgressBar imageLoading;
 
+    boolean loading = true;
 
 
     public void setData(JsonArray dataset) {
@@ -52,12 +58,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             addToDataset(dataset, 0);
         }
     }
-
-    public JsonArray data = null;
-    Context context;
-    Constants.POSTS_TYPE type;
-    User user;
-    ProgressBar imageLoading;
 
 
     // / Provide a reference to the views for each data item
@@ -120,10 +120,11 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         dataset = jsonParser.parse(gson.toJson(posts)).getAsJsonArray();
 
 //        Log.d(TAG, type.toString());
-        if (data != null) {
+        if (data != null && data.size() > 0) {
             JsonArray firstPart = new JsonArray();
             for (int i = 0; i != offset; i ++)
-                firstPart.add(data.remove(0));
+                if (data.size() > 0)
+                    firstPart.add(data.remove(0));
 
 
             for (int i = 0; i != dataset.size(); i++) {
@@ -147,6 +148,9 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                 data.add(dataset.get(i));
         }
         notifyDataSetChanged();
+
+        loading = false;
+
     }
 
 //    public void addDataToDataset (JsonArray extraData) {
