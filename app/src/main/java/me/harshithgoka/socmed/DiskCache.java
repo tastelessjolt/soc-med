@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.nfc.cardemulation.HostApduService;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -34,9 +35,8 @@ public class DiskCache {
         File cacheDir = Storage.getContext().getCacheDir();
         File file = new File(cacheDir, "img" + fileid + ".png");
         if (file.exists()) {
-            if (holder != null)
-
-                holder.setImageUri(Uri.fromFile(file));
+            DiskImageAsyncTask asyncTask = new DiskImageAsyncTask(holder);
+            asyncTask.execute(fileid);
             return 0;
         }
         else {
@@ -46,6 +46,32 @@ public class DiskCache {
         }
     }
 
+    static class DiskImageAsyncTask extends AsyncTask<String, Void, Boolean> {
+
+        PostAdapter.ViewHolder holder;
+        DiskImageAsyncTask (PostAdapter.ViewHolder holder) {
+            this.holder = holder;
+        }
+
+        @Override
+        protected Boolean doInBackground(String... params) {
+            File cacheDir = Storage.getContext().getCacheDir();
+            File file = new File(cacheDir, "img" + params[0] + ".png");
+            if (holder != null)
+                holder.loadBitmapInMemory(Uri.fromFile(file));
+
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean b) {
+            if (b) {
+                if (holder != null)
+                    holder.setImage();
+            }
+        }
+
+    }
 
     static class ImageAsyncTask extends AsyncTask<String, Void, Boolean> {
 
@@ -106,6 +132,7 @@ public class DiskCache {
 
                             uri = Uri.fromFile(file);
                             b = true;
+                            holder.loadBitmapInMemory(uri);
                         }
 
 
@@ -134,8 +161,7 @@ public class DiskCache {
         protected void onPostExecute(Boolean b) {
             if (b) {
                 if (holder != null && uri != null)
-                    holder.setImageUri(uri);
-
+                    holder.setImage();
             }
         }
     }

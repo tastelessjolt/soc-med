@@ -70,6 +70,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         public LinearLayout mLin;
         public boolean more;
         public Uri imageUri;
+        public Bitmap bitmap;
         public ViewHolder(LinearLayout v) {
             super(v);
             mLin = v;
@@ -117,21 +118,29 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             return BitmapFactory.decodeFile(file.getAbsolutePath(), options);
         }
 
-
-        public void setImageUri(Uri imageUri) {
+        public void loadBitmapInMemory (Uri imageUri) {
             this.imageUri = imageUri;
             ImageView imageView;
-            mLin.findViewById(R.id.image_loading).setVisibility(View.GONE);
 
             if (mLin != null && (imageView = mLin.findViewById(R.id.image)) != null ) {
 
                 try {
 //                Log.d(TAG,  "MaxWidth = "  + imageView.getMaxWidth() + " or " + imageView.getRootView().getMeasuredWidth());
-                    imageView.setImageBitmap(decodeSampledBitmapFile(new File(imageUri.getPath()), imageView.getRootView().getMeasuredWidth(), 0));
+                    bitmap = decodeSampledBitmapFile(new File(imageUri.getPath()), imageView.getRootView().getMeasuredWidth(), 0);
                 }
                 catch (Exception e) {
-                    imageView.setImageURI(imageUri);
+                    bitmap = BitmapFactory.decodeFile(new File(imageUri.getPath()).getAbsolutePath());
                 }
+            }
+        }
+
+
+        public void setImage() {
+            ImageView imageView;
+            mLin.findViewById(R.id.image_loading).setVisibility(View.GONE);
+
+            if (mLin != null && (imageView = mLin.findViewById(R.id.image)) != null && bitmap != null) {
+                imageView.setImageBitmap(bitmap);
             }
         }
     }
