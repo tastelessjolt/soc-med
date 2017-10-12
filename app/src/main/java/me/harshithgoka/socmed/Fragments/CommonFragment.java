@@ -1,4 +1,4 @@
-package me.harshithgoka.socmed;
+package me.harshithgoka.socmed.Fragments;
 
 
 import android.os.Bundle;
@@ -12,6 +12,11 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import me.harshithgoka.socmed.Adapters.CommentAdapter;
+import me.harshithgoka.socmed.Adapters.PostAdapter;
+import me.harshithgoka.socmed.Misc.Constants;
+import me.harshithgoka.socmed.R;
 
 /**
  * Created by harshithgoka on 05/10/17.

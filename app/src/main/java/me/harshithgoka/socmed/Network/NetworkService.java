@@ -1,4 +1,4 @@
-package me.harshithgoka.socmed;
+package me.harshithgoka.socmed.Network;
 
 import android.app.Service;
 import android.content.Intent;
@@ -14,6 +14,8 @@ import org.json.JSONArray;
 
 import java.lang.ref.WeakReference;
 import java.sql.BatchUpdateException;
+
+import me.harshithgoka.socmed.Misc.Constants;
 
 public class NetworkService extends Service {
 

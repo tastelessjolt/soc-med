@@ -1,4 +1,4 @@
-package me.harshithgoka.socmed;
+package me.harshithgoka.socmed.Adapters;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -35,6 +35,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import me.harshithgoka.socmed.Misc.Constants;
+import me.harshithgoka.socmed.Misc.Utils;
+import me.harshithgoka.socmed.Network.NetworkService;
+import me.harshithgoka.socmed.R;
+import me.harshithgoka.socmed.Storage.DiskCache;
+import me.harshithgoka.socmed.Storage.Post;
+import me.harshithgoka.socmed.Storage.User;
+
 /**
  * Created by harshithgoka on 05/10/17.
  */
@@ -47,11 +55,11 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     public JsonArray data = null;
     Context context;
     Constants.POSTS_TYPE type;
-    User user;
+    public User user;
     ProgressBar imageLoading;
     boolean clearNext = false;
 
-    boolean loading = true;
+    public boolean loading = true;
 
 
     public void setData(JsonArray dataset) {
@@ -204,7 +212,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         this.user = user;
     }
 
-    PostAdapter(Context context, JsonArray argdata, Constants.POSTS_TYPE type) {
+    public PostAdapter(Context context, JsonArray argdata, Constants.POSTS_TYPE type) {
         this.type = type;
         this.context = context;
         setData(argdata);

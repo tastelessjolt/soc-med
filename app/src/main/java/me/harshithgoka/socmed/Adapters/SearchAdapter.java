@@ -1,4 +1,4 @@
-package me.harshithgoka.socmed;
+package me.harshithgoka.socmed.Adapters;
 
 import android.app.ListActivity;
 import android.content.Context;
@@ -35,6 +35,12 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import me.harshithgoka.socmed.Misc.Constants;
+import me.harshithgoka.socmed.Misc.Utils;
+import me.harshithgoka.socmed.Network.NetworkService;
+import me.harshithgoka.socmed.R;
+import me.harshithgoka.socmed.Storage.User;
+
 /**
  * Created by harshithgoka on 07/10/17.
  */
@@ -44,7 +50,7 @@ public class SearchAdapter extends BaseAdapter implements Filterable {
     private Context mContext;
     List<User> users = new ArrayList<>();
 
-    SearchAdapter(Context context) {
+    public SearchAdapter(Context context) {
         mContext = context;
     }
 

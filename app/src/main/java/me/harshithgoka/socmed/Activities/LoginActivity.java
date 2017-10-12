@@ -1,4 +1,4 @@
-package me.harshithgoka.socmed;
+package me.harshithgoka.socmed.Activities;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -21,32 +21,32 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.HttpCookie;
 import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+
+import me.harshithgoka.socmed.Misc.Constants;
+import me.harshithgoka.socmed.Misc.Utils;
+import me.harshithgoka.socmed.Network.MyCookieStore;
+import me.harshithgoka.socmed.R;
+import me.harshithgoka.socmed.Storage.UserStorage;
 
 /**
  * A login screen that offers login via email/password.
@@ -279,22 +279,25 @@ public class LoginActivity extends AppCompatActivity {
                         throw new Exception("Login to your internet provider");
                     }
 
-                    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+//                    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+//
+//                    StringBuilder stringBuilder = new StringBuilder();
+//
+//                    int nbytes;
+//                    byte[] bytes = new byte[1024];
+//                    while ((nbytes = in.read(bytes, 0, 1024)) != -1 ) {
+//                        stringBuilder.append(new String(bytes, 0, nbytes));
+//                    }
+//
+//                    JsonParser jsonParser = new JsonParser();
+//                    JsonObject response = jsonParser.parse(stringBuilder.toString()).getAsJsonObject();
 
-                    StringBuilder stringBuilder = new StringBuilder();
+                    JsonObject response = Utils.getAndParse(urlConnection.getInputStream());
 
-                    int nbytes;
-                    byte[] bytes = new byte[1024];
-                    while ((nbytes = in.read(bytes, 0, 1024)) != -1 ) {
-                        stringBuilder.append(new String(bytes, 0, nbytes));
-                    }
-
-                    JsonParser jsonParser = new JsonParser();
-                    JsonObject response = jsonParser.parse(stringBuilder.toString()).getAsJsonObject();
                     Log.d(TAG, response.toString());
                     if (response.get("status").getAsBoolean()) {
                         ret = "true";
-                        Storage.setName(response.get("data").getAsString());
+                        UserStorage.setName(response.get("data").getAsString());
                     }
                     else {
                         ret = response.get("message").getAsString();

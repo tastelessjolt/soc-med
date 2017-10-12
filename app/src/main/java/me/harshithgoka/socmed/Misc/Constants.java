@@ -1,4 +1,4 @@
-package me.harshithgoka.socmed;
+package me.harshithgoka.socmed.Misc;
 
 import android.app.Service;
 import android.graphics.Typeface;
@@ -12,7 +12,7 @@ import java.lang.reflect.Type;
  */
 
 public final class Constants {
-    public static String URL = "http://10.4.65.62:8080/twitter-backend/";
+    public static String URL = "http://10.0.2.2:8080/twitter-backend/";
 
     public static int MAX_LIMIT = 10;
 

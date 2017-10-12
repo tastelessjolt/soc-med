@@ -1,4 +1,4 @@
-package me.harshithgoka.socmed;
+package me.harshithgoka.socmed.Fragments;
 
 import android.content.Context;
 import android.content.Intent;
@@ -17,9 +17,17 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
+
+import me.harshithgoka.socmed.Activities.LoginActivity;
+import me.harshithgoka.socmed.Adapters.PostAdapter;
+import me.harshithgoka.socmed.Misc.Constants;
+import me.harshithgoka.socmed.Misc.RecyclerViewScrollListener;
+import me.harshithgoka.socmed.Network.MyCookieStore;
+import me.harshithgoka.socmed.Network.NetworkService;
+import me.harshithgoka.socmed.R;
+import me.harshithgoka.socmed.Storage.UserStorage;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -96,7 +104,7 @@ public class ProfileFragment extends CommonFragment {
         });
 
         TextView textView = rootView.findViewById(R.id.name);
-        textView.setText(Storage.getName());
+        textView.setText(UserStorage.getName());
 
         logout = (Button) rootView.findViewById(R.id.logout);
         logout.setOnClickListener(new View.OnClickListener() {

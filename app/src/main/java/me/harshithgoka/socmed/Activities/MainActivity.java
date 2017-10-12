@@ -1,4 +1,4 @@
-package me.harshithgoka.socmed;
+package me.harshithgoka.socmed.Activities;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -25,6 +25,15 @@ import com.google.gson.JsonObject;
 
 import java.io.InputStream;
 import java.net.CookieManager;
+
+import me.harshithgoka.socmed.Fragments.CommonFragment;
+import me.harshithgoka.socmed.Fragments.MainFragment;
+import me.harshithgoka.socmed.Fragments.ProfileFragment;
+import me.harshithgoka.socmed.Fragments.SearchFragment;
+import me.harshithgoka.socmed.Misc.Constants;
+import me.harshithgoka.socmed.Network.MyCookieStore;
+import me.harshithgoka.socmed.Network.NetworkService;
+import me.harshithgoka.socmed.R;
 
 public class MainActivity extends AppCompatActivity {
 

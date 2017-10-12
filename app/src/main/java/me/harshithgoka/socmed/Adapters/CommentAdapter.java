@@ -1,6 +1,5 @@
-package me.harshithgoka.socmed;
+package me.harshithgoka.socmed.Adapters;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -17,11 +16,16 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+
+import me.harshithgoka.socmed.Misc.Constants;
+import me.harshithgoka.socmed.Misc.Utils;
+import me.harshithgoka.socmed.R;
+import me.harshithgoka.socmed.Storage.Comment;
+import me.harshithgoka.socmed.Storage.UserStorage;
 
 /**
  * Created by harshithgoka on 06/10/17.
@@ -43,7 +47,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
     }
 
     public boolean more;
-    JsonArray comments;
+    public JsonArray comments;
     JsonObject object;
     CommentAdapter (JsonObject object, JsonArray data ) {
         this.object = object;
@@ -65,7 +69,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
             Gson gson = new Gson();
             Type listType = new TypeToken<List<Comment>>() {}.getType();
             List<Comment> commentList = gson.fromJson(comments,listType);
-            commentList.add(new Comment("", Storage.getName(), postid, comment, timestamp));
+            commentList.add(new Comment("", UserStorage.getName(), postid, comment, timestamp));
 
             Collections.sort(commentList, new Comparator<Comment>() {
                 @Override

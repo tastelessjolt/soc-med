@@ -1,10 +1,9 @@
-package me.harshithgoka.socmed;
+package me.harshithgoka.socmed.Misc;
 
-import android.support.annotation.StringDef;
-import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+
+import me.harshithgoka.socmed.Adapters.PostAdapter;
 
 /**
  * Created by harshithgoka on 12/10/17.
@@ -15,7 +14,7 @@ public class RecyclerViewScrollListener extends RecyclerView.OnScrollListener {
     public static final String TAG = RecyclerViewScrollListener.class.getName();
 
     LinearLayoutManager linearLayoutManager;
-    RecyclerViewScrollListener(LinearLayoutManager linearLayoutManager) {
+    public RecyclerViewScrollListener(LinearLayoutManager linearLayoutManager) {
         this.linearLayoutManager = linearLayoutManager;
     }
 

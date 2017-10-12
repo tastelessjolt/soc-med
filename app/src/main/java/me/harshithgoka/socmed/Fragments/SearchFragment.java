@@ -1,4 +1,4 @@
-package me.harshithgoka.socmed;
+package me.harshithgoka.socmed.Fragments;
 
 import android.content.Context;
 import android.content.Intent;
@@ -35,6 +35,14 @@ import org.w3c.dom.Text;
 
 import java.lang.reflect.Type;
 import java.util.List;
+
+import me.harshithgoka.socmed.Adapters.PostAdapter;
+import me.harshithgoka.socmed.Adapters.SearchAdapter;
+import me.harshithgoka.socmed.Misc.Constants;
+import me.harshithgoka.socmed.Misc.RecyclerViewScrollListener;
+import me.harshithgoka.socmed.Network.NetworkService;
+import me.harshithgoka.socmed.R;
+import me.harshithgoka.socmed.Storage.User;
 
 
 /**

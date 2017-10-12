@@ -1,4 +1,4 @@
-package me.harshithgoka.socmed;
+package me.harshithgoka.socmed.Misc;
 
 import android.content.Context;
 import android.graphics.Bitmap;

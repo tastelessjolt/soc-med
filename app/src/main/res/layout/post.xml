@@ -155,7 +155,7 @@
                 card_view:layout_constraintTop_toTopOf="parent"
                 android:visibility="gone"/>
 
-            <me.harshithgoka.socmed.MyImageView
+            <me.harshithgoka.socmed.Misc.MyImageView
                 android:id="@+id/image"
                 android:minHeight="60dp"
                 android:adjustViewBounds="true"

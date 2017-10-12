@@ -1,36 +1,25 @@
-package me.harshithgoka.socmed;
+package me.harshithgoka.socmed.Network;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Base64OutputStream;
 import android.util.Log;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
-import java.io.FilterWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.net.CookieHandler;
-import java.net.CookieManager;
-import java.net.CookiePolicy;
-import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -38,8 +27,11 @@ import java.net.URLEncoder;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.zip.CheckedOutputStream;
+
+import me.harshithgoka.socmed.Misc.Constants;
+import me.harshithgoka.socmed.Misc.Utils;
+import me.harshithgoka.socmed.Storage.UserStorage;
+import me.harshithgoka.socmed.Storage.User;
 
 /**
  * Created by harshithgoka on 03/10/17.
@@ -105,7 +97,7 @@ public class NetworkHandler extends Handler {
 
                     if (response.get("status").getAsBoolean()) {
                         state = Constants.NETWORK_STATE.LOGGED_IN;
-                        Storage.setName(response.get("data").getAsString());
+                        UserStorage.setName(response.get("data").getAsString());
                     } else {
                         state = Constants.NETWORK_STATE.NOT_LOGGED_IN;
                     }
@@ -274,7 +266,7 @@ public class NetworkHandler extends Handler {
             if ( !bundle.getString( Constants.POST_IMG,"").equals("") ) {
                 Uri imgUri = Uri.parse(bundle.getString(Constants.POST_IMG));
                 try {
-                    stream = Storage.getContext().getContentResolver().openInputStream(imgUri);
+                    stream = UserStorage.getContext().getContentResolver().openInputStream(imgUri);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

@@ -1,4 +1,4 @@
-package me.harshithgoka.socmed;
+package me.harshithgoka.socmed.Network;
 
 import android.os.Handler;
 import android.os.HandlerThread;

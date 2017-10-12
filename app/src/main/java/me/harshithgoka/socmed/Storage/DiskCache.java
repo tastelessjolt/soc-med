@@ -1,16 +1,11 @@
-package me.harshithgoka.socmed;
+package me.harshithgoka.socmed.Storage;
 
-import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.nfc.cardemulation.HostApduService;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ImageView;
-
-import com.google.gson.JsonObject;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -27,7 +22,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static me.harshithgoka.socmed.Storage.getContext;
+import me.harshithgoka.socmed.Adapters.PostAdapter;
+import me.harshithgoka.socmed.Misc.Constants;
+import me.harshithgoka.socmed.R;
+import me.harshithgoka.socmed.Misc.Utils;
 
 /**
  * Created by harshithgoka on 09/10/17.
@@ -92,14 +90,14 @@ public class DiskCache {
         }
     }
 
-    static int getImage(String fileid, PostAdapter.ViewHolder holder) {
+    public static int getImage(String fileid, PostAdapter.ViewHolder holder) {
 
         if (bitmaps.containsKey(fileid) ) {
             holder.setImage(bitmaps.get(fileid));
             return 0;
         }
         else {
-            File cacheDir = Storage.getContext().getCacheDir();
+            File cacheDir = UserStorage.getContext().getCacheDir();
             File file = new File(cacheDir, "img" + fileid + ".png");
             if (file.exists()) {
                 DiskImageAsyncTask asyncTask = new DiskImageAsyncTask(fileid, holder);
@@ -124,7 +122,7 @@ public class DiskCache {
 
         @Override
         protected Boolean doInBackground(String... params) {
-            File cacheDir = Storage.getContext().getCacheDir();
+            File cacheDir = UserStorage.getContext().getCacheDir();
             File file = new File(cacheDir, "img" + fileid + ".png");
             if (holder != null)
                 loadBitmapInMemory(params[0], Uri.fromFile(file), holder);
@@ -191,7 +189,7 @@ public class DiskCache {
 
 
                         Bitmap response = BitmapFactory.decodeStream(connection.getInputStream());
-                        File cacheDir = Storage.getContext().getCacheDir();
+                        File cacheDir = UserStorage.getContext().getCacheDir();
                         if (response != null) {
                             // make a new bitmap from your file
                             File file = new File(cacheDir, "img" + strings[0] + ".png");
