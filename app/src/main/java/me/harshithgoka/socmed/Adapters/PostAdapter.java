@@ -54,7 +54,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     public String[] dummy_dataset;
     public JsonArray data = null;
     Context context;
-    Constants.POSTS_TYPE type;
+    public Constants.POSTS_TYPE type;
     public User user;
     ProgressBar imageLoading;
     boolean clearNext = false;
@@ -133,34 +133,59 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             JsonParser jsonParser = new JsonParser();
             dataset = jsonParser.parse(gson.toJson(posts)).getAsJsonArray();
 
-//        Log.d(TAG, type.toString());
-            if (data != null && data.size() > 0) {
-                JsonArray firstPart = new JsonArray();
-                for (int i = 0; i != offset; i ++)
-                    if (data.size() > 0)
-                        firstPart.add(data.remove(0));
-
-
-                for (int i = 0; i != dataset.size(); i++) {
-                    if (data.size() > 0)
-                        data.remove(0);
-                    else
-                        break;
+            if (offset == -1) {
+                if (data != null && data.size() > 0) {
+                    for (int i = 0; i != dataset.size(); i++) {
+                        data.add(dataset.get(i));
+                    }
                 }
-
-                for (int i = 0; i != dataset.size(); i++)
-                    firstPart.add(dataset.get(i));
-
-                for (int i = 0; i != data.size(); i++)
-                    firstPart.add(data.get(i));
-
-                data = firstPart;
+                else {
+                    data = dataset;
+                }
             }
             else {
-                data = new JsonArray();
-                for (int i = 0; i != dataset.size(); i++)
-                    data.add(dataset.get(i));
+                if (data != null && data.size() > 0) {
+
+                    if (type == Constants.POSTS_TYPE.FEED) {
+                        if (data.get(0).getAsJsonObject().get("timestamp").getAsString().compareTo(dataset.get(dataset.size() - 1).getAsJsonObject().get("timestamp").getAsString()) > 0) {
+                            for (int i = 0; i != data.size(); i++) {
+                                dataset.add(data.get(i));
+                            }
+                            data = dataset;
+                            return true;
+                        }
+                    }
+
+                    JsonArray firstPart = new JsonArray();
+                    for (int i = 0; i != offset; i ++)
+                        if (data.size() > 0)
+                            firstPart.add(data.remove(0));
+
+
+                    for (int i = 0; i != dataset.size(); i++) {
+                        if (data.size() > 0)
+                            data.remove(0);
+                        else
+                            break;
+                    }
+
+                    for (int i = 0; i != dataset.size(); i++)
+                        firstPart.add(dataset.get(i));
+
+                    for (int i = 0; i != data.size(); i++)
+                        firstPart.add(data.get(i));
+
+                    data = firstPart;
+                }
+                else {
+                    data = new JsonArray();
+                    for (int i = 0; i != dataset.size(); i++)
+                        data.add(dataset.get(i));
+                }
             }
+
+//        Log.d(TAG, type.toString());
+
             return true;
         }
 
@@ -176,10 +201,39 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     public void addToDataset(JsonArray dataset, int offset) {
 
         if (clearNext) {
-            if (offset == 0) {
-                clearNext = false;
+            Gson gson = new Gson();
+            Type listType = new TypeToken<List<Post>>() {}.getType();
+
+            List<Post> posts = gson.fromJson(dataset, listType);
+            if (type == Constants.POSTS_TYPE.FEED) {
+                Collections.sort(posts, new Comparator<Post>() {
+                    @Override
+                    public int compare(Post post, Post t1) {
+                        return post.timestamp.compareTo(t1.timestamp);
+                    }
+                });
             }
-            data = dataset;
+            else {
+                Collections.sort(posts, new Comparator<Post>() {
+                    @Override
+                    public int compare(Post post, Post t1) {
+                        return -post.timestamp.compareTo(t1.timestamp);
+                    }
+                });
+            }
+            JsonParser jsonParser = new JsonParser();
+            dataset = jsonParser.parse(gson.toJson(posts)).getAsJsonArray();
+
+
+            if (type == Constants.POSTS_TYPE.FEED) {
+                // TODO: What to do here? 
+            }
+            else {
+                if (offset == 0) {
+                    clearNext = false;
+                }
+                data = dataset;
+            }
             notifyDataSetChanged();
             loading = false;
         }

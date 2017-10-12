@@ -29,7 +29,12 @@ public class RecyclerViewScrollListener extends RecyclerView.OnScrollListener {
 
             if ( (currFirstPos + currNum >= totalNum) && !( (PostAdapter) recyclerView.getAdapter()).loading ) {
                 adapter.loading = true;
-                ( (PostAdapter) recyclerView.getAdapter() ).loadMore(totalNum);
+                if (adapter.type == Constants.POSTS_TYPE.FEED) {
+                    ( (PostAdapter) recyclerView.getAdapter() ).loadMore(-1);
+                }
+                else {
+                    ( (PostAdapter) recyclerView.getAdapter() ).loadMore(totalNum);
+                }
                 Snackbar.make(recyclerView.getRootView(), "Checking for new posts", Snackbar.LENGTH_SHORT).show();
             }
 

@@ -32,7 +32,12 @@ public class NetworkService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             int what = intent.getIntExtra(Constants.WHAT, -1);
-            int offset = intent.getIntExtra(Constants.OFFSET, 0);
+            int offset = intent.getIntExtra(Constants.OFFSET, -1);
+
+            if (what != Constants.GET_FEED)
+                if (offset == -1)
+                    offset = 0;
+
             int limit = intent.getIntExtra(Constants.LIMIT, Constants.MAX_LIMIT);
             if (what == Constants.GET_NETWORK_STATE) {
                 tHandler.sendMessage(tHandler.obtainMessage(Constants.GET_NETWORK_STATE));
