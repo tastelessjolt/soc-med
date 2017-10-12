@@ -49,6 +49,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     Constants.POSTS_TYPE type;
     User user;
     ProgressBar imageLoading;
+    boolean clearNext = false;
 
     boolean loading = true;
 
@@ -166,7 +167,15 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
     public void addToDataset(JsonArray dataset, int offset) {
 
-        if ( (dataset == null || dataset.size() == 0)){
+        if (clearNext) {
+            if (offset == 0) {
+                clearNext = false;
+            }
+            data = dataset;
+            notifyDataSetChanged();
+            loading = false;
+        }
+        else if ( (dataset == null || dataset.size() == 0)){
             if (offset == 0) {
                 if (data != null ) {
                     data = null;
@@ -227,23 +236,28 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         context.startService(intent);
     }
 
-    public void refreshDataset() {
+    public void refreshDataset(boolean clear) {
+        clearNext = clear;
         Intent intent = new Intent(context, NetworkService.class);
         switch (type) {
             case FEED:
-                intent.putExtra(Constants.WHAT, Constants.GET_FEED);
-                break;
+            intent.putExtra(Constants.WHAT, Constants.GET_FEED);
+            break;
             case MY_POSTS:
-                intent.putExtra(Constants.WHAT, Constants.GET_MY_POSTS);
-                break;
+            intent.putExtra(Constants.WHAT, Constants.GET_MY_POSTS);
+            break;
             case USER_POSTS:
-                Bundle bundle = new Bundle();
-                bundle.putSerializable(Constants.USER_DATA, user);
-                intent.putExtra(Constants.WHAT, Constants.GET_USER_POSTS);
-                intent.putExtra(Constants.INTENT_DATA, bundle);
-                break;
+            Bundle bundle = new Bundle();
+            bundle.putSerializable(Constants.USER_DATA, user);
+            intent.putExtra(Constants.WHAT, Constants.GET_USER_POSTS);
+            intent.putExtra(Constants.INTENT_DATA, bundle);
+            break;
         }
         context.startService(intent);
+    }
+
+    public void refreshDataset() {
+        refreshDataset(true);
     }
 
     @Override
