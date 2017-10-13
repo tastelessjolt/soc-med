@@ -130,6 +130,8 @@ public class MainFragment extends CommonFragment {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.addOnScrollListener(new RecyclerViewScrollListener(linearLayoutManager));
 
+        adapter.setRecyclerView(recyclerView);
+
 //        recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
 //            @Override
 //            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
@@ -152,7 +154,7 @@ public class MainFragment extends CommonFragment {
             public void onRefresh() {
                 Log.d(TAG, "Refresh received");
 
-                adapter.refreshDataset();
+                adapter.refreshDataset(true);
             }
         });
 

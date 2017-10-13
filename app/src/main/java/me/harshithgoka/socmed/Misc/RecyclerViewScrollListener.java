@@ -31,13 +31,26 @@ public class RecyclerViewScrollListener extends RecyclerView.OnScrollListener {
                 adapter.loading = true;
                 if (adapter.type == Constants.POSTS_TYPE.FEED) {
                     ( (PostAdapter) recyclerView.getAdapter() ).loadMore(-1);
+                    Snackbar.make(recyclerView.getRootView(), "Checking for new posts", Snackbar.LENGTH_LONG).show();
                 }
                 else {
                     ( (PostAdapter) recyclerView.getAdapter() ).loadMore(totalNum);
+                    Snackbar.make(recyclerView.getRootView(), "Checking for any older posts", Snackbar.LENGTH_LONG).show();
                 }
-                Snackbar.make(recyclerView.getRootView(), "Checking for new posts", Snackbar.LENGTH_SHORT).show();
             }
+        }
 
+        if (newState == RecyclerView.SCROLL_STATE_DRAGGING && linearLayoutManager != null && adapter != null) {
+            int totalNum = linearLayoutManager.getItemCount();
+            int currNum = linearLayoutManager.getChildCount();
+            int currFirstPos = linearLayoutManager.findFirstVisibleItemPosition();
+
+            if (adapter.type == Constants.POSTS_TYPE.FEED) {
+                if ( currFirstPos <= 0 ) {
+                    ((PostAdapter) recyclerView.getAdapter()).loadMore(totalNum);
+                    Snackbar.make(recyclerView.getRootView(), "Loading older posts", Snackbar.LENGTH_LONG).show();
+                }
+            }
         }
 
 //        Log.d(TAG, "ScrollState - " + newState);

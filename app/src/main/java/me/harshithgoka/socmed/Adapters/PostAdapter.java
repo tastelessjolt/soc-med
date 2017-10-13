@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -60,6 +61,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     boolean clearNext = false;
 
     public boolean loading = true;
+    RecyclerView recyclerView;
 
 
     public void setData(JsonArray dataset) {
@@ -67,6 +69,10 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             data = null;
             addToDataset(dataset, 0);
         }
+    }
+
+    public void setRecyclerView (RecyclerView recyclerView) {
+        this.recyclerView = recyclerView;
     }
 
 
@@ -225,16 +231,27 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             dataset = jsonParser.parse(gson.toJson(posts)).getAsJsonArray();
 
 
-            if (type == Constants.POSTS_TYPE.FEED) {
-                // TODO: What to do here? 
+            if (type == Constants.POSTS_TYPE.FEED && dataset != null) {
+                if (offset != -1) {
+                    if (data != null)
+                        for (int i = 0; i != data.size(); i++)
+                            dataset.add(data.get(i));
+                    data = dataset;
+                    notifyDataSetChanged();
+                }
+                else {
+                    clearNext = false;
+                    data = dataset;
+                    notifyDataSetChanged();
+                }
             }
             else {
                 if (offset == 0) {
                     clearNext = false;
                 }
                 data = dataset;
+                notifyDataSetChanged();
             }
-            notifyDataSetChanged();
             loading = false;
         }
         else if ( (dataset == null || dataset.size() == 0)){
@@ -320,6 +337,10 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
     public void refreshDataset() {
         refreshDataset(true);
+    }
+
+    public void loadOlderPosts() {
+        loadMore(getItemCount());
     }
 
     @Override
