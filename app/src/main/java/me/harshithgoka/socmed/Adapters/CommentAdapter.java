@@ -28,7 +28,7 @@ import me.harshithgoka.socmed.Storage.Comment;
 import me.harshithgoka.socmed.Storage.UserStorage;
 
 /**
- * Created by harshithgoka on 06/10/17.
+ * Created by akashtrehan on 06/10/17.
  */
 
 public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHolder>{

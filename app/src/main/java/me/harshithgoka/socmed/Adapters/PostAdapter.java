@@ -45,7 +45,7 @@ import me.harshithgoka.socmed.Storage.Post;
 import me.harshithgoka.socmed.Storage.User;
 
 /**
- * Created by harshithgoka on 05/10/17.
+ * Created by akashtrehan on 05/10/17.
  */
 
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {

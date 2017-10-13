@@ -11,7 +11,7 @@ import android.widget.ImageView;
 import java.net.URL;
 
 /**
- * Created by harshithgoka on 10/10/17.
+ * Created by akashtrehan on 10/10/17.
  */
 
 public class MyImageView extends android.support.v7.widget.AppCompatImageView {
